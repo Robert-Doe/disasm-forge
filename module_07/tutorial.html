@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 07 — The Call Stack: Mechanics from First Principles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}a{color:var(--cyan);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+  .stack-diagram{font-family:'Source Code Pro',monospace;font-size:13px;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;}
+  .stack-row{display:flex;align-items:stretch;margin:2px 0;}
+  .stack-addr{color:var(--muted);min-width:160px;}
+  .stack-cell{flex:1;border:1px solid var(--border);padding:6px 12px;border-radius:3px;}
+  .stack-rsp{background:#0d2040;color:var(--cyan);}
+  .stack-rbp{background:#1a1040;color:var(--purple);}
+  .stack-ret{background:#1f0d0d;color:var(--red);}
+  .stack-local{background:#0d1f0d;color:var(--green);}
+  .stack-saved{background:#1a1040;color:var(--purple);}
+  .stack-arrow{color:var(--gold);margin-left:8px;font-size:12px;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 07 of 21 &mdash; Core Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>The Call Stack: Mechanics from First Principles</h1>
+  <p class="subtitle">push, pop, call, ret — how the CPU saves and restores rip to enable function calls, where local variables live, and why the stack is the primary target of memory-corruption exploits.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Modules 01–06 complete: registers solid, memory sections understood, conditional jumps fluent.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>stack.asm</code> — demonstrates push/pop byte mechanics, the call/ret mechanism, stack frame setup/teardown, local variables at rbp-offsets, and three levels of nested calls with live rsp addresses</li>
+    <li>A clear mental model of the call stack layout that enables you to read crash dumps, write exploits, and understand GDB backtraces</li>
+  </ul></div>
+
+  <h2>What Is the Stack?</h2>
+  <p>The stack is a region of ordinary RAM. There is nothing physically special about it. What makes it "the stack" is the CPU register <code>rsp</code> (the Stack Pointer), which always points to the topmost used byte. By convention, the stack <strong>grows downward</strong> — each new piece of data pushed onto the stack lives at a <em>lower</em> address than the previous one. On a modern Linux process, the stack typically starts at an address near the top of virtual memory (around <code>0x7fffffffe000</code>) and grows toward lower addresses as functions call each other.</p>
+  <p>The stack has two roles that cannot be separated: it stores <strong>return addresses</strong> (so <code>ret</code> knows where to go back to) and <strong>local variables</strong> (data that only exists while a function is active). These two roles sharing the same memory region is what makes buffer overflows so dangerous — a local variable that overflows its bounds can overwrite the return address sitting right next to it.</p>
+
+  <h2>push and pop: The Physical Mechanics</h2>
+  <pre><code><span class="comment">; push VALUE  is exactly equivalent to:</span>
+<span class="kw">sub</span>  <span class="reg">rsp</span>, <span class="num">8</span>          <span class="comment">; grow the stack (move rsp down by 8 bytes)</span>
+<span class="kw">mov</span>  [<span class="reg">rsp</span>], VALUE    <span class="comment">; write value at the new top of stack</span>
+
+<span class="comment">; pop DEST  is exactly equivalent to:</span>
+<span class="kw">mov</span>  DEST, [<span class="reg">rsp</span>]     <span class="comment">; read value from top of stack into DEST</span>
+<span class="kw">add</span>  <span class="reg">rsp</span>, <span class="num">8</span>          <span class="comment">; shrink the stack (move rsp up by 8 bytes)</span></code></pre>
+
+  <div class="callout tip">
+    <div class="label">Tip — "Popped" data is not erased</div>
+    After <code>pop rbx</code>, the bytes that were at <code>[rsp-8]</code> are still there in RAM — they just live below the new <code>rsp</code>. The convention is that anything below <code>rsp</code> is "dead" (may be overwritten at any time), but the bytes aren't zeroed. This is why stack memory can leak sensitive data: a function that doesn't zero its local buffer before returning leaves that data accessible until the next function clobbers it.
+  </div>
+
+  <h2>call and ret: Saving and Restoring rip</h2>
+  <pre><code><span class="comment">; call LABEL  is exactly equivalent to:</span>
+<span class="kw">push</span> &lt;address of next instruction&gt;   <span class="comment">; save return address</span>
+<span class="kw">jmp</span>  LABEL                            <span class="comment">; transfer control</span>
+
+<span class="comment">; ret  is exactly equivalent to:</span>
+<span class="kw">pop</span>  <span class="reg">rip</span>                              <span class="comment">; load return address into rip</span>
+<span class="comment">; (you cannot write "pop rip" directly — ret is the only way)</span></code></pre>
+
+  <div class="callout danger">
+    <div class="label">The Core of Every Stack Exploit</div>
+    <code>ret</code> unconditionally trusts whatever 8 bytes are at <code>[rsp]</code> and jumps to that address. It performs no validation. If an attacker can write an arbitrary 64-bit value to <code>[rsp]</code> at the moment <code>ret</code> executes — either by overflowing a local buffer or by other means — they control <code>rip</code>. This is the foundational primitive of stack-based exploitation. Module 18 demonstrates this live with GDB.
+  </div>
+
+  <h2>The Standard Stack Frame</h2>
+  <p>Every function that uses the stack (has local variables or calls other functions) follows a prologue/epilogue pattern. This creates a <strong>frame</strong> — a region of the stack dedicated to that function's data.</p>
+
+  <pre><code><span class="comment">; === PROLOGUE — runs at function entry ===</span>
+<span class="lbl">my_function:</span>
+    <span class="kw">push</span> <span class="reg">rbp</span>          <span class="comment">; save the CALLER's frame base pointer</span>
+    <span class="kw">mov</span>  <span class="reg">rbp</span>, <span class="reg">rsp</span>    <span class="comment">; OUR frame base = current top of stack</span>
+    <span class="kw">sub</span>  <span class="reg">rsp</span>, <span class="num">32</span>     <span class="comment">; allocate 32 bytes for local variables</span>
+                      <span class="comment">; rsp must stay 16-byte aligned!</span>
+
+    <span class="comment">; Local variables live here:</span>
+    <span class="comment">; [rbp - 8]  = first  local (8 bytes)</span>
+    <span class="comment">; [rbp - 16] = second local (8 bytes)</span>
+    <span class="comment">; [rbp - 24] = third  local (8 bytes)</span>
+    <span class="comment">; [rbp - 32] = fourth local (8 bytes)</span>
+
+    <span class="comment">; ... function body ...</span>
+
+<span class="comment">; === EPILOGUE — runs before ret ===</span>
+    <span class="kw">add</span>  <span class="reg">rsp</span>, <span class="num">32</span>     <span class="comment">; release local variable space</span>
+    <span class="kw">pop</span>  <span class="reg">rbp</span>          <span class="comment">; restore caller's rbp</span>
+    <span class="kw">ret</span>               <span class="comment">; pop return address → rip</span>
+
+<span class="comment">; Shorthand for the epilogue: "leave" = add rsp,(rbp-rsp) + pop rbp</span>
+    <span class="kw">leave</span>
+    <span class="kw">ret</span></code></pre>
+
+  <h2>Stack Frame Memory Layout</h2>
+  <p>At any point inside <code>my_function</code> (after the prologue), the stack looks like this:</p>
+
+  <div class="stack-diagram">
+    <div class="stack-row"><span class="stack-addr">higher addresses ↑</span><span class="stack-cell" style="background:var(--bg3);color:var(--muted)">... caller's frame ...</span></div>
+    <div class="stack-row"><span class="stack-addr">[rbp + 8]</span><span class="stack-cell stack-ret">return address (saved rip from call)</span><span class="stack-arrow">← ret reads here</span></div>
+    <div class="stack-row"><span class="stack-addr">[rbp + 0]</span><span class="stack-cell stack-saved">saved caller rbp</span><span class="stack-arrow">← rbp points here</span></div>
+    <div class="stack-row"><span class="stack-addr">[rbp - 8]</span><span class="stack-cell stack-local">local variable 1</span></div>
+    <div class="stack-row"><span class="stack-addr">[rbp - 16]</span><span class="stack-cell stack-local">local variable 2</span></div>
+    <div class="stack-row"><span class="stack-addr">[rbp - 32]</span><span class="stack-cell stack-rsp">local variable 4</span><span class="stack-arrow">← rsp points here</span></div>
+    <div class="stack-row"><span class="stack-addr">lower addresses ↓</span><span class="stack-cell" style="background:var(--bg3);color:var(--muted)">... next call's frame goes here ...</span></div>
+  </div>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — The Return Address Is Adjacent to Locals</div>
+    Notice that the return address lives at <code>[rbp+8]</code> and local variable 1 lives at <code>[rbp-8]</code>. They are separated by only 16 bytes (the saved rbp + one local). A buffer overflow that writes past the end of local variable 1 in the upward direction (toward higher addresses) will eventually overwrite the saved rbp and then the return address. Module 18 exploits exactly this layout.
+  </div>
+
+  <h2>16-Byte Stack Alignment</h2>
+  <p>The System V AMD64 ABI (Linux/macOS) and the Microsoft x64 ABI (Windows) both require that <code>rsp</code> must be aligned to a 16-byte boundary at the moment of any <code>call</code> instruction. SIMD instructions (<code>movaps</code>, <code>movdqa</code>) and some library functions will crash with a General Protection fault (#GP) if <code>rsp</code> is misaligned.</p>
+  <p>The rule: after entering a function, <code>rsp</code> is aligned to 8 (not 16) because <code>call</code> pushed an 8-byte return address. Your prologue's <code>push rbp</code> adds another 8 bytes — now aligned to 16 again. Then you must subtract a multiple of 16 from <code>rsp</code> to maintain alignment while allocating local space.</p>
+
+  <pre><code><span class="comment">; After call: rsp = 0x...X8 (8-byte aligned, not 16)</span>
+<span class="kw">push</span> <span class="reg">rbp</span>       <span class="comment">; rsp -= 8 → now 16-byte aligned (rsp = 0x...X0)</span>
+<span class="kw">mov</span>  <span class="reg">rbp</span>, <span class="reg">rsp</span>
+<span class="kw">sub</span>  <span class="reg">rsp</span>, <span class="num">32</span>   <span class="comment">; 32 is a multiple of 16 → rsp still 16-byte aligned</span>
+<span class="comment">; NEVER: sub rsp, 24  (would misalign to 8-byte boundary)</span></code></pre>
+
+  <h2>GDB Stack Inspection Commands</h2>
+  <div class="shell">
+    <span class="prompt">(gdb) </span>break level_c<br/>
+    <span class="prompt">(gdb) </span>run<br/>
+    <span class="prompt">(gdb) </span>info frame<br/>
+    <span class="out">Stack level 0, frame at 0x7fffffffde00:<br/>
+ rip = 0x401182 in level_c; saved rip = 0x4011b3<br/>
+ called by frame at 0x7fffffffde30<br/>
+ Arglist at 0x7fffffffddf8, args:<br/>
+ Locals at 0x7fffffffddf8</span><br/>
+    <span class="prompt">(gdb) </span>x/32gx $rsp<br/>
+    <span class="out">0x7fffffffddeo: 0xcccccccccccccccc  0x0000000000000000<br/>
+0x7fffffffde00: 0x00007fffffffde30  0x00000000004011b3<br/>
+...</span><br/>
+    <span class="prompt">(gdb) </span>backtrace<br/>
+    <span class="out">#0  level_c ()<br/>
+#1  0x4011b3 in level_b ()<br/>
+#2  0x4011e3 in level_a ()<br/>
+#3  0x401230 in main ()</span>
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_07 &amp;&amp; make &amp;&amp; ./stack<br/>
+    <span class="out">=== push / pop mechanics ===<br/>
+  rsp : 0x00007FFFFFFFDDC0<br/>
+  rsp : 0x00007FFFFFFFDDB8<br/>
+  rsp : 0x00007FFFFFFFDDC0<br/>
+  val : 1234605616436508680 (0x1122334455667788)<br/>
+=== call / ret: how the return address works ===<br/>
+  val : 30 (0x1E)<br/>
+=== three nested calls — observe rsp in GDB ===<br/>
+  rsp : 0x00007FFFFFFFDD90   ← level_a<br/>
+  rsp : 0x00007FFFFFFFDD60   ← level_b (32 bytes lower)<br/>
+  rsp : 0x00007FFFFFFFDD30   ← level_c (32 bytes lower again)</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Count the bytes per frame</h4>
+    <p>From the output above, compute the exact byte difference between each <code>rsp</code> level. It should match: <code>push rbp</code> (8) + <code>sub rsp, 16</code> (16) + <code>call</code> pushes return address (8) = 32. Verify this arithmetic matches the assembly code.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Read the stack in GDB</h4>
+    <p>Break at <code>level_c</code> and run <code>x/16gx $rsp</code>. Identify each 8-byte slot: the local variable (<code>0xCCCC...</code>), the saved rbp of level_c, the return address from level_b, the saved rbp of level_b, and so on. Match each address to the code. This is exactly how you analyse crash dumps.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>4. Write a recursive factorial</h4>
+    <p>Implement <code>factorial(n)</code> in assembly: if <code>rdi == 0</code> return 1, else return <code>rdi * factorial(rdi-1)</code>. Remember to save <code>rdi</code> on the stack before the recursive call (push it as a local variable), because the recursive call will clobber <code>rdi</code>. Test with <code>factorial(10)</code> = 3628800.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>5. Manually walk the frame chain</h4>
+    <p>Inside GDB at <code>level_c</code>, use <code>x/2gx $rbp</code> to read the saved rbp and return address. The saved rbp points to level_b's frame. Use that value to read level_b's saved rbp and return address: <code>x/2gx &lt;saved_rbp_value&gt;</code>. Continue until you reach main's frame. Compare with the <code>backtrace</code> output.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_08/tutorial.html" style="color:inherit;">What's Next — Module 08: Procedures, Recursion &amp; the Red Zone</a></h2>
+    <p>Module 07 showed you the basic frame. Module 08 goes deeper: saving and restoring callee-saved registers, recursive assembly functions, the System V AMD64 "red zone" (128 bytes below rsp that signal handlers won't touch), and tail-call optimisation. The new file is <code>procs.asm</code>, which implements recursive Fibonacci so you can trace the full call-tree depth in GDB.</p>
+  </div>
+</div>
+</body>
+</html>

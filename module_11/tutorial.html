@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 11 — String & Array Operations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 11 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>String &amp; Array Operations</h1>
+  <p class="subtitle">The <code>rep</code> prefix and the six string instructions — <code>movsb</code>, <code>stosb</code>, <code>lodsb</code>, <code>scasb</code>, <code>cmpsb</code>, <code>insb/outsb</code> — turn a complex loop into a single prefixed opcode. You will implement <code>strlen</code>, <code>strcpy</code>, <code>memset</code>, and <code>memcmp</code> in assembly and understand their security implications at the byte level.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 10 (addressing modes), Module 07 (stack frames), Module 05 (bitwise, direction flag).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>strings.asm</code> — <code>asm_strlen</code> (manual + <code>repne scasb</code>), <code>asm_strcpy</code>, <code>asm_memset</code> (rep stosb), <code>asm_memcmp</code> (repe cmpsb), plus bulk copy and scan demos</li>
+  </ul></div>
+
+  <h2>The Direction Flag and String Instructions</h2>
+  <p>x86-64 has six "string" instructions that operate on a source pointer (<code>rsi</code>), a destination pointer (<code>rdi</code>), a count (<code>rcx</code>), and an accumulator (<code>al</code>/<code>ax</code>/<code>eax</code>/<code>rax</code>). After each operation, the CPU automatically increments or decrements <code>rsi</code>/<code>rdi</code> by the operand size, depending on the <strong>Direction Flag (DF)</strong>.</p>
+
+  <table>
+    <tr><th>Instruction</th><th>What it does (one step)</th><th>DF=0 (CLD)</th><th>DF=1 (STD)</th></tr>
+    <tr><td><code>movsb</code></td><td><code>[rdi] = [rsi]</code></td><td>rsi++, rdi++</td><td>rsi--, rdi--</td></tr>
+    <tr><td><code>stosb</code></td><td><code>[rdi] = al</code></td><td>rdi++</td><td>rdi--</td></tr>
+    <tr><td><code>lodsb</code></td><td><code>al = [rsi]</code></td><td>rsi++</td><td>rsi--</td></tr>
+    <tr><td><code>scasb</code></td><td><code>flags = al - [rdi]</code></td><td>rdi++</td><td>rdi--</td></tr>
+    <tr><td><code>cmpsb</code></td><td><code>flags = [rsi] - [rdi]</code></td><td>rsi++, rdi++</td><td>rsi--, rdi--</td></tr>
+  </table>
+
+  <div class="callout warn">
+    <div class="label">Convention</div>
+    The System V AMD64 ABI requires DF=0 (cleared) at function entry and exit. Always call <code>cld</code> before string instructions unless you are certain DF is already clear. If you set DF with <code>std</code>, clear it immediately after with <code>cld</code>.
+  </div>
+
+  <h2>The REP Family of Prefixes</h2>
+  <p>Adding <code>rep</code> before a string instruction makes it repeat: decrement <code>rcx</code>, execute, check termination condition. If <code>rcx</code> reaches zero, the instruction stops.</p>
+
+  <table>
+    <tr><th>Prefix</th><th>Termination</th><th>Common use</th></tr>
+    <tr><td><code>rep</code></td><td><code>rcx == 0</code></td><td>movsb (copy), stosb (fill)</td></tr>
+    <tr><td><code>repe</code> / <code>repz</code></td><td><code>rcx == 0</code> OR <code>ZF == 0</code></td><td>cmpsb (compare while equal)</td></tr>
+    <tr><td><code>repne</code> / <code>repnz</code></td><td><code>rcx == 0</code> OR <code>ZF == 1</code></td><td>scasb (scan until found)</td></tr>
+  </table>
+
+  <h2>strlen — Two Implementations</h2>
+  <h3>Manual Loop (most readable)</h3>
+  <pre><code><span class="comment">; asm_strlen(const char *s) → rax = length</span>
+<span class="lbl">asm_strlen:</span>
+    <span class="kw">xor</span>  <span class="reg">rax</span>, <span class="reg">rax</span>            <span class="comment">; rax = index (counter)</span>
+<span class="lbl">.loop:</span>
+    <span class="kw">cmp</span>  <span class="kw">byte</span> [<span class="reg">rdi</span> + <span class="reg">rax</span>], <span class="num">0</span>
+    <span class="kw">je</span>   <span class="lbl">.done</span>
+    <span class="kw">inc</span>  <span class="reg">rax</span>
+    <span class="kw">jmp</span>  <span class="lbl">.loop</span>
+<span class="lbl">.done:</span>
+    <span class="kw">ret</span></code></pre>
+
+  <h3>Using repne scasb</h3>
+  <pre><code><span class="comment">; asm_strlen_rep(const char *s) → rax = length</span>
+<span class="lbl">asm_strlen_rep:</span>
+    <span class="kw">mov</span>  <span class="reg">rcx</span>, -<span class="num">1</span>             <span class="comment">; scan up to 2^64 bytes</span>
+    <span class="kw">xor</span>  <span class="reg">al</span>, <span class="reg">al</span>              <span class="comment">; search for null byte</span>
+    <span class="kw">repne</span> <span class="kw">scasb</span>             <span class="comment">; while [rdi] != al: rdi++, rcx--</span>
+    <span class="comment">; After the loop: rcx started at -1 = 0xFFFF...FFFF</span>
+    <span class="comment">; and ended at (0xFFFF...FFFF - length - 1)</span>
+    <span class="comment">; So: ~rcx = length + 1 → ~rcx - 1 = length</span>
+    <span class="kw">not</span>  <span class="reg">rcx</span>
+    <span class="kw">dec</span>  <span class="reg">rcx</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="reg">rcx</span>
+    <span class="kw">ret</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Why <code>not rcx; dec rcx</code>?</div>
+    <p><code>rcx</code> starts at <code>-1</code> (all bits set). After scanning a string of length <em>n</em>, <code>repne scasb</code> decrements <code>rcx</code> once per character plus one more for the null terminator, so <code>rcx = -1 - n - 1 = -n - 2</code>. Taking <code>~rcx</code> gives <code>n + 1</code> (since <code>~(-n-2) = n+1</code>). Subtracting 1 yields <em>n</em>. This is a standard idiom — you will see it in hand-optimized libc implementations.</p>
+  </div>
+
+  <h2>memset — rep stosb</h2>
+  <pre><code><span class="comment">; asm_memset(void *dst, int val, size_t n)</span>
+<span class="lbl">asm_memset:</span>
+    <span class="comment">; rdi = dst, rsi = val, rdx = n</span>
+    <span class="kw">mov</span>  <span class="reg">al</span>, <span class="reg">sil</span>             <span class="comment">; al = fill byte (low 8 bits of val)</span>
+    <span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="reg">rdx</span>            <span class="comment">; rcx = count</span>
+    <span class="kw">rep</span>  <span class="kw">stosb</span>               <span class="comment">; [rdi++] = al, rcx-- until rcx==0</span>
+    <span class="kw">ret</span></code></pre>
+
+  <div class="callout tip">
+    <div class="label">Fast String Microcode</div>
+    On modern Intel CPUs (Ivy Bridge+), <code>rep stosb</code> with a cache-line-aligned destination and large count triggers hardware-accelerated "fast string" operations that internally use 16 or 32-byte stores. The same applies to <code>rep movsb</code>. This makes the simple prefixed form competitive with explicit SSE2 implementations for many practical sizes.
+  </div>
+
+  <h2>memcmp — repe cmpsb</h2>
+  <pre><code><span class="comment">; asm_memcmp(const void *a, const void *b, size_t n) → rax</span>
+<span class="lbl">asm_memcmp:</span>
+    <span class="comment">; rdi = a, rsi = b, rdx = n</span>
+    <span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="reg">rdx</span>
+    <span class="kw">xor</span>  <span class="reg">rax</span>, <span class="reg">rax</span>
+    <span class="kw">test</span> <span class="reg">rcx</span>, <span class="reg">rcx</span>
+    <span class="kw">jz</span>   <span class="lbl">.done</span>
+    <span class="kw">repe</span> <span class="kw">cmpsb</span>              <span class="comment">; compare [rdi++] vs [rsi++] while equal</span>
+    <span class="kw">je</span>   <span class="lbl">.done</span>               <span class="comment">; all bytes equal → rax = 0</span>
+    <span class="kw">movzx</span> <span class="reg">eax</span>, <span class="kw">byte</span> [<span class="reg">rdi</span>-<span class="num">1</span>]  <span class="comment">; byte from a at mismatch</span>
+    <span class="kw">movzx</span> <span class="reg">ecx</span>, <span class="kw">byte</span> [<span class="reg">rsi</span>-<span class="num">1</span>]  <span class="comment">; byte from b at mismatch</span>
+    <span class="kw">sub</span>  <span class="reg">rax</span>, <span class="reg">rcx</span>            <span class="comment">; return a_byte - b_byte</span>
+<span class="lbl">.done:</span>
+    <span class="kw">ret</span></code></pre>
+
+  <div class="callout danger">
+    <div class="label">Security — Timing Side Channels in memcmp</div>
+    <p><code>repe cmpsb</code> stops at the first mismatch — it returns early. This means comparing a password of 8 identical bytes is faster than comparing one that matches the first 7. An attacker who can measure the time of many comparisons can recover the expected value byte-by-byte. Cryptographic code must use <strong>constant-time comparison</strong>: compare all bytes unconditionally and only check the result at the end. The assembly pattern looks like:</p>
+    <pre><code><span class="comment">; Constant-time compare of n bytes: no early exit</span>
+    <span class="kw">xor</span>  <span class="reg">eax</span>, <span class="reg">eax</span>
+<span class="lbl">.loop:</span>
+    <span class="kw">movzx</span> <span class="reg">r10d</span>, <span class="kw">byte</span> [<span class="reg">rdi</span>]
+    <span class="kw">movzx</span> <span class="reg">r11d</span>, <span class="kw">byte</span> [<span class="reg">rsi</span>]
+    <span class="kw">xor</span>  <span class="reg">r10d</span>, <span class="reg">r11d</span>          <span class="comment">; 0 if equal, non-zero if different</span>
+    <span class="kw">or</span>   <span class="reg">eax</span>, <span class="reg">r10d</span>           <span class="comment">; accumulate diffs — no branch</span>
+    <span class="kw">inc</span>  <span class="reg">rdi</span>
+    <span class="kw">inc</span>  <span class="reg">rsi</span>
+    <span class="kw">dec</span>  <span class="reg">rcx</span>
+    <span class="kw">jnz</span>  <span class="lbl">.loop</span>
+    <span class="comment">; rax == 0 iff equal</span></code></pre>
+  </div>
+
+  <h2>Scanning with repne scasb</h2>
+  <pre><code><span class="comment">; Find the index of a byte in a buffer</span>
+    <span class="kw">lea</span>  <span class="reg">rdi</span>, [<span class="kw">rel</span> <span class="lbl">buffer</span>]
+    <span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="num">256</span>            <span class="comment">; max scan</span>
+    <span class="kw">mov</span>  <span class="reg">al</span>, <span class="num">0x2C</span>            <span class="comment">; search for ','</span>
+    <span class="kw">repne</span> <span class="kw">scasb</span>
+    <span class="comment">; rdi now points one byte PAST the match</span>
+    <span class="comment">; rdi - buffer_base - 1 = index of matched byte</span>
+    <span class="kw">lea</span>  <span class="reg">rbx</span>, [<span class="kw">rel</span> <span class="lbl">buffer</span>]
+    <span class="kw">sub</span>  <span class="reg">rdi</span>, <span class="reg">rbx</span>
+    <span class="kw">dec</span>  <span class="reg">rdi</span>                 <span class="comment">; rdi = zero-based index</span></code></pre>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_11 &amp;&amp; make &amp;&amp; ./strings<br/>
+    <span class="out">=== asm_strlen: count bytes until null ===<br/>
+  val: 25                    0x19<br/>
+  val: 25                    0x19<br/>
+=== asm_strcpy: copy bytes including null ===<br/>
+  str: "Hello, Assembly Language!"<br/>
+  val: 25                    0x19<br/>
+=== asm_memset: fill block with byte value ===<br/>
+  val: 13744721859075833278  0xBEBEBEBEBEBEBEBE<br/>
+=== asm_memcmp: compare two byte blocks ===<br/>
+  val: 0                     0x0<br/>
+  val: 18446744073709551615  0xFFFFFFFFFFFFFFFF</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. strrev — reverse a string in place</h4>
+    <p>Implement <code>asm_strrev(char *s)</code>. Use <code>asm_strlen</code> to find the end, then walk two pointers (one from the start, one from the end) inward, swapping bytes. Stop when they meet or cross. Test with <code>"Hello"</code> → <code>"olleH"</code>.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. strncpy with explicit null-padding</h4>
+    <p>Implement <code>asm_strncpy(char *dst, const char *src, size_t n)</code>: copy at most <em>n</em> bytes from src to dst; if src is shorter than n, pad the rest of dst with null bytes. Use <code>rep movsb</code> for the copy part and <code>rep stosb</code> for the padding. This null-padding behavior is the C standard definition and prevents uninitialized-memory information leaks in fixed-size buffers.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Constant-time memcmp</h4>
+    <p>Implement the constant-time comparison pattern shown in the security callout above. Then verify that both the early-exit <code>repe cmpsb</code> version and your constant-time version return the same result for equal strings and unequal strings. Under GDB, use <code>stepi</code> to count the number of instructions executed by each version on: (a) identical strings, (b) strings that differ in the first byte, (c) strings that differ in the last byte. Confirm that your constant-time version executes the same instruction count in all three cases.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_12/tutorial.html" style="color:inherit;">What's Next — Module 12: x87 FPU &amp; SSE2 Scalar Floating Point</a></h2>
+    <p>Module 12 moves off the integer execution units onto the FPU and SSE2 scalar pipeline. You will work with IEEE 754 double-precision numbers using <code>movsd</code>, <code>addsd</code>, <code>mulsd</code>, <code>divsd</code>, <code>sqrtsd</code>, and <code>cvtsi2sd</code> for integer-to-float conversions. The x87 stack-based FPU is also covered so you can read legacy disassembly. By the end, you will implement a small dot-product function that matches the compiler output.</p>
+  </div>
+</div>
+</body>
+</html>

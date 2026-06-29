@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 20 — Bare-Metal Runtime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:13px;margin:16px 0;line-height:1.7;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .stack-init{font-family:'Source Code Pro',monospace;font-size:13px;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;}
+  .si-row{display:flex;gap:12px;align-items:center;padding:3px 0;}
+  .si-addr{color:var(--muted);width:100px;flex-shrink:0;}
+  .si-val{flex:1;padding:5px 10px;border-radius:4px;border:1px solid var(--border);}
+  .si-comment{color:var(--muted);font-size:11px;width:220px;}
+  .si-hi{background:#0a1a2a;border-color:var(--purple);color:var(--purple);}
+  .si-argc{background:#0a1a0a;border-color:var(--green);color:var(--green);}
+  .si-argv{background:#1a1a0a;border-color:var(--orange);color:var(--orange);}
+  .si-env{background:#1a0a1a;border-color:var(--cyan);color:var(--cyan);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 20 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Bare-Metal Runtime</h1>
+  <p class="subtitle">No C runtime. No libc. No <code>main</code> called by someone else. The kernel hands control to <code>_start</code> and everything after that is yours: stack setup, heap initialization, I/O, and exit — all in assembly.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 15 (syscalls, mmap/brk), Module 16 (linker, symbols), Module 08 (stack discipline, callee-saved registers).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>runtime/start.asm</code> — <code>_start</code>: reads initial stack, aligns rsp, calls <code>heap_init</code> and <code>our_main</code>, calls <code>sys_exit</code></li>
+    <li><code>runtime/syscall_wrappers.asm</code> — thin C-ABI wrappers around 8 Linux syscalls</li>
+    <li><code>runtime/alloc.asm</code> — <code>heap_init</code> + <code>bump_alloc</code>: monotonic allocator via <code>sys_brk</code></li>
+    <li><code>runtime/io.asm</code> — <code>io_write_str</code>, <code>io_write_u64</code>, <code>io_write_hex</code>, <code>our_main</code></li>
+  </ul></div>
+
+  <h2>What Happens Between execve and main()</h2>
+  <p>When you run any program, the kernel does not jump directly to <code>main</code>. It jumps to the ELF entry point (<code>e_entry</code>), which is <code>_start</code> in the C runtime startup object (<code>crt1.o</code>). The C runtime's <code>_start</code> then does considerable work before calling <code>main</code>:</p>
+  <ol>
+    <li>Reads <code>argc</code>, <code>argv</code>, <code>envp</code> from the initial kernel stack</li>
+    <li>Aligns <code>rsp</code> to 16 bytes</li>
+    <li>Calls global constructors (<code>__init_array</code>)</li>
+    <li>Initialises the heap (<code>malloc</code> internals)</li>
+    <li>Sets up locale, signal handlers, atexit</li>
+    <li>Calls <code>__libc_start_main(main, argc, argv, ...)</code></li>
+    <li>After <code>main</code> returns: calls <code>atexit</code> handlers, flushes stdio, calls <code>_exit</code></li>
+  </ol>
+  <p>Our bare-metal <code>_start</code> skips steps 3–7 entirely. That is not a flaw — it is a feature when building minimal tools.</p>
+
+  <h2>The Initial Kernel Stack Layout</h2>
+  <div class="stack-init">
+    <div class="si-row"><div class="si-addr">rsp+0  →</div><div class="si-val si-argc">argc (int64)</div><div class="si-comment">← first thing _start pops</div></div>
+    <div class="si-row"><div class="si-addr">rsp+8  →</div><div class="si-val si-argv">argv[0] (char*)</div><div class="si-comment">← program name</div></div>
+    <div class="si-row"><div class="si-addr">rsp+16 →</div><div class="si-val si-argv">argv[1] (char*)</div><div class="si-comment">← first argument</div></div>
+    <div class="si-row"><div class="si-addr">…</div><div class="si-val si-argv">…</div><div class="si-comment"></div></div>
+    <div class="si-row"><div class="si-addr">rsp+8+argc*8</div><div class="si-val si-hi">NULL sentinel</div><div class="si-comment">← end of argv</div></div>
+    <div class="si-row"><div class="si-addr">next  →</div><div class="si-val si-env">envp[0] (char*)</div><div class="si-comment">← environment variables</div></div>
+    <div class="si-row"><div class="si-addr">…</div><div class="si-val si-env">…</div><div class="si-comment"></div></div>
+    <div class="si-row"><div class="si-addr">next  →</div><div class="si-val si-hi">NULL sentinel</div><div class="si-comment">← end of envp</div></div>
+    <div class="si-row"><div class="si-addr">next  →</div><div class="si-val si-hi">Auxiliary vector</div><div class="si-comment">← AT_ENTRY, AT_PHDR, etc.</div></div>
+  </div>
+
+  <h2>_start Implementation</h2>
+  <pre><code><span class="lbl">_start:</span>
+    <span class="kw">pop</span>  <span class="reg">rdi</span>               <span class="comment">; rdi = argc</span>
+    <span class="kw">mov</span>  <span class="reg">rsi</span>, <span class="reg">rsp</span>           <span class="comment">; rsi = &argv[0]  (rsp now points here after pop)</span>
+    <span class="kw">lea</span>  <span class="reg">rdx</span>, [<span class="reg">rsi</span> + <span class="reg">rdi</span>*<span class="num">8</span> + <span class="num">8</span>]  <span class="comment">; rdx = &envp[0]</span>
+
+    <span class="comment">; Align stack: after pop, rsp = original_rsp+8</span>
+    <span class="comment">; We need rsp % 16 == 0 BEFORE 'call' (which pushes 8 more)</span>
+    <span class="comment">; So we want rsp % 16 == 8 here.</span>
+    <span class="kw">and</span>  <span class="reg">rsp</span>, ~<span class="num">0xF</span>          <span class="comment">; round down to 16-byte boundary</span>
+    <span class="kw">sub</span>  <span class="reg">rsp</span>, <span class="num">8</span>              <span class="comment">; now rsp % 16 == 8, ready for call</span>
+
+    <span class="kw">call</span> <span class="lbl">heap_init</span>
+    <span class="kw">call</span> <span class="lbl">our_main</span>           <span class="comment">; rdi/rsi/rdx already set from above</span>
+
+    <span class="kw">mov</span>  <span class="reg">rdi</span>, <span class="reg">rax</span>            <span class="comment">; exit code from our_main</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">60</span>             <span class="comment">; SYS_EXIT</span>
+    <span class="kw">syscall</span></code></pre>
+
+  <h2>Syscall Wrapper Pattern</h2>
+  <pre><code><span class="comment">; sys_write(fd, buf, count) — the 4th-arg problem does not apply here</span>
+<span class="lbl">sys_write:</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">1</span>              <span class="comment">; SYS_WRITE</span>
+    <span class="kw">syscall</span>
+    <span class="kw">ret</span>
+
+<span class="comment">; sys_mmap has 6 args; the 4th (flags) arrives in rcx but syscall wants r10</span>
+<span class="lbl">sys_mmap:</span>
+    <span class="kw">mov</span>  <span class="reg">r10</span>, <span class="reg">rcx</span>           <span class="comment">; flags: rcx → r10</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">9</span>              <span class="comment">; SYS_MMAP</span>
+    <span class="kw">syscall</span>
+    <span class="kw">ret</span></code></pre>
+
+  <h2>Bump Allocator — sys_brk Based</h2>
+  <pre><code><span class="comment">; heap_init: call sys_brk(0) to get current break, then extend by 64 KiB</span>
+<span class="lbl">heap_init:</span>
+    <span class="kw">xor</span>  <span class="reg">rdi</span>, <span class="reg">rdi</span>
+    <span class="kw">call</span> <span class="lbl">sys_brk</span>            <span class="comment">; rax = current break</span>
+    <span class="kw">mov</span>  [<span class="kw">rel</span> <span class="lbl">heap_base</span>], <span class="reg">rax</span>
+    <span class="kw">mov</span>  [<span class="kw">rel</span> <span class="lbl">heap_ptr</span>],  <span class="reg">rax</span>
+    <span class="kw">add</span>  <span class="reg">rax</span>, <span class="num">65536</span>
+    <span class="kw">mov</span>  <span class="reg">rdi</span>, <span class="reg">rax</span>
+    <span class="kw">call</span> <span class="lbl">sys_brk</span>            <span class="comment">; extend break by 64 KiB</span>
+    <span class="kw">mov</span>  [<span class="kw">rel</span> <span class="lbl">heap_end</span>], <span class="reg">rax</span>
+    <span class="kw">ret</span>
+
+<span class="comment">; bump_alloc(size): round up to 8, return heap_ptr, advance heap_ptr</span>
+<span class="lbl">bump_alloc:</span>
+    <span class="kw">add</span>  <span class="reg">rdi</span>, <span class="num">7</span>              <span class="comment">; round up to next multiple of 8</span>
+    <span class="kw">and</span>  <span class="reg">rdi</span>, ~<span class="num">7</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, [<span class="kw">rel</span> <span class="lbl">heap_ptr</span>]
+    <span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="reg">rax</span>
+    <span class="kw">add</span>  <span class="reg">rcx</span>, <span class="reg">rdi</span>           <span class="comment">; new heap_ptr</span>
+    <span class="kw">cmp</span>  <span class="reg">rcx</span>, [<span class="kw">rel</span> <span class="lbl">heap_end</span>]
+    <span class="kw">ja</span>   <span class="lbl">.oom</span>
+    <span class="kw">mov</span>  [<span class="kw">rel</span> <span class="lbl">heap_ptr</span>], <span class="reg">rcx</span>
+    <span class="kw">ret</span>                     <span class="comment">; rax = allocated block</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Why bump allocation with no free()?</div>
+    A bump allocator has O(1) allocation with zero overhead per object. There is no free list, no metadata per allocation, no fragmentation. For programs that allocate during startup and then run until exit, bump allocation is optimal. This is why many language runtimes (Go's goroutine stacks at creation, some garbage collectors' nursery generations) use arena/bump allocation for short-lived objects.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_20 &amp;&amp; make<br/>
+    <span class="out">nasm -f elf64 -o runtime/start.o runtime/start.asm
+nasm -f elf64 -o runtime/syscall_wrappers.o runtime/syscall_wrappers.asm
+nasm -f elf64 -o runtime/alloc.o runtime/alloc.asm
+nasm -f elf64 -o runtime/io.o runtime/io.asm
+ld -o runtime_demo runtime/start.o runtime/syscall_wrappers.o runtime/alloc.o runtime/io.o
+Built bare-metal runtime (no libc): runtime_demo
+runtime_demo: ELF 64-bit LSB executable, x86-64, statically linked, not stripped</span><br/>
+    <span class="prompt">$ </span>./runtime_demo hello world<br/>
+    <span class="out">=== Bare-Metal Runtime ===
+argc: 3
+argv[0]: ./runtime_demo
+bump_alloc(128) returned: 0x0000000000499000
+AAAAAAAAAAAAAAAA
+heap used: 128 bytes
+Runtime demo complete.</span><br/>
+    <span class="prompt">$ </span>make check-no-libc<br/>
+    <span class="out">=== Dynamic dependencies (should be empty for bare-metal) ===
+        not a dynamic executable
+=== Imported symbols (should be empty) ===
+(no undefined symbols — pure assembly)</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Print all argv and envp</h4>
+    <p>Extend <code>our_main</code> in <code>io.asm</code> to loop through all <code>argv</code> entries (until the NULL sentinel) and print each one on its own line using <code>io_write_str</code> + <code>io_newline</code>. Then do the same for the first 5 <code>envp</code> entries. Verify: <code>./runtime_demo foo bar baz</code> should print all three arguments.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Implement io_write_s64 (signed decimal)</h4>
+    <p>Add <code>io_write_s64(int64_t n)</code> to <code>io.asm</code>. If <code>n &lt; 0</code>, write a <code>'-'</code> character then call <code>io_write_u64(-n)</code>. Handle the edge case: <code>INT64_MIN = -9223372036854775808</code> cannot be negated (negation overflows int64_t). For that specific value, write the string literal directly. Test with 0, -1, -42, INT64_MIN.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Implement io_read_line and a simple echo loop</h4>
+    <p>Add <code>size_t io_read_line(char *buf, size_t max)</code> that calls <code>sys_read(STDIN_FILENO, buf, max)</code> and returns the number of bytes read. In <code>our_main</code>, loop: allocate a 256-byte buffer via <code>bump_alloc</code>, call <code>io_read_line</code>, write the result back with <code>sys_write</code>. Exit when zero bytes are read (EOF). Test: <code>echo "hello from stdin" | ./runtime_demo</code>. You have now built a complete read-process-write loop with no libc whatsoever.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_21/tutorial.html" style="color:inherit;">What's Next — Module 21: Capstone Mini Disassembler</a></h2>
+    <p>The final module synthesizes the entire course into one project: a length-disassembler for x86-64 instructions written in pure assembly. Given a byte buffer, it identifies each instruction's length, opcode, and primary operand type, then prints a formatted disassembly listing. You will handle REX prefixes, the ModRM byte, SIB byte, and displacement fields — the same tables every disassembler (IDA, Ghidra, objdump) consults at its core.</p>
+  </div>
+</div>
+</body>
+</html>

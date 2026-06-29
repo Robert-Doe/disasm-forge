@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 06 — Control Flow: Every Jump Instruction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}a{color:var(--cyan);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 06 of 21 &mdash; Core Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Control Flow: Every Jump Instruction</h1>
+  <p class="subtitle">cmp, test, all 16 conditional jumps, signed vs unsigned, if/else, while, for, and a jump-table switch — with the security insight that RIP control means process control.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Modules 01–05: flags register understood (CF, ZF, SF, OF), bitwise ops fluent.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>control.asm</code> — an if/else classifier, a while loop, a for countdown, and a 5-case jump table switch</li>
+    <li>Complete reference of all 16 conditional jump mnemonics with their flag conditions</li>
+    <li>Understanding of why <code>cmp</code> and <code>test</code> are different instructions for the same concept</li>
+  </ul></div>
+
+  <h2>Control Flow Is Just Manipulating rip</h2>
+  <p>In the fetch-decode-execute cycle, the CPU reads the instruction at the address in <code>rip</code>, executes it, and advances <code>rip</code> to the next instruction. Control flow works by <em>changing what rip points to</em>. An unconditional <code>jmp</code> overwrites <code>rip</code> with a new address. A conditional jump does the same — but only if certain flags are set.</p>
+  <p>This is why controlling <code>rip</code> is the goal of almost every code-execution exploit. Buffer overflows overwrite the saved return address (which gets loaded into <code>rip</code> by <code>ret</code>). ROP chains control <code>rip</code> by placing fake return addresses on the stack. If an attacker can write an arbitrary value into <code>rip</code>, they control the program. Module 18 makes this concrete with a live exploit.</p>
+
+  <h2>cmp and test</h2>
+  <p>Neither <code>cmp</code> nor <code>test</code> store a result — they exist solely to set flags for the conditional jump that follows.</p>
+  <pre><code><span class="kw">cmp</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>   <span class="comment">; computes rax - rbx, sets CF/ZF/SF/OF, discards result</span>
+<span class="kw">cmp</span>  <span class="reg">rax</span>, <span class="num">0</span>     <span class="comment">; compare with immediate</span>
+
+<span class="kw">test</span> <span class="reg">rax</span>, <span class="reg">rax</span>   <span class="comment">; computes rax & rax, sets ZF/SF/PF, discards result</span>
+                 <span class="comment">; canonical "is rax zero?" — ZF=1 means zero</span>
+<span class="kw">test</span> <span class="reg">rax</span>, <span class="num">0x80</span>  <span class="comment">; "is bit 7 set?" — ZF=0 means yes</span></code></pre>
+
+  <div class="callout tip">
+    <div class="label">Tip — test reg,reg vs cmp reg,0</div>
+    <code>test rax, rax</code> and <code>cmp rax, 0</code> both set ZF based on whether <code>rax</code> is zero. <code>test</code> is preferred because it is one byte shorter (no immediate operand) and cannot affect CF or OF (making it safer in multi-instruction sequences that chain flag checks). Compilers always emit <code>test</code> for the "is value zero?" check.
+  </div>
+
+  <h2>All 16 Conditional Jump Mnemonics</h2>
+  <table>
+    <tr><th>Mnemonic</th><th>Alias</th><th>Condition (flags)</th><th>Signed or Unsigned</th></tr>
+    <tr><td><code>je</code></td><td><code>jz</code></td><td>ZF=1</td><td>Either (equal)</td></tr>
+    <tr><td><code>jne</code></td><td><code>jnz</code></td><td>ZF=0</td><td>Either (not equal)</td></tr>
+    <tr><td><code>jl</code></td><td><code>jnge</code></td><td>SF≠OF</td><td>Signed: less</td></tr>
+    <tr><td><code>jle</code></td><td><code>jng</code></td><td>ZF=1 or SF≠OF</td><td>Signed: less or equal</td></tr>
+    <tr><td><code>jg</code></td><td><code>jnle</code></td><td>ZF=0 and SF=OF</td><td>Signed: greater</td></tr>
+    <tr><td><code>jge</code></td><td><code>jnl</code></td><td>SF=OF</td><td>Signed: greater or equal</td></tr>
+    <tr><td><code>jb</code></td><td><code>jc</code>, <code>jnae</code></td><td>CF=1</td><td>Unsigned: below</td></tr>
+    <tr><td><code>jbe</code></td><td><code>jna</code></td><td>CF=1 or ZF=1</td><td>Unsigned: below or equal</td></tr>
+    <tr><td><code>ja</code></td><td><code>jnbe</code></td><td>CF=0 and ZF=0</td><td>Unsigned: above</td></tr>
+    <tr><td><code>jae</code></td><td><code>jnc</code>, <code>jnb</code></td><td>CF=0</td><td>Unsigned: above or equal</td></tr>
+    <tr><td><code>js</code></td><td>—</td><td>SF=1</td><td>Sign flag set (result negative)</td></tr>
+    <tr><td><code>jns</code></td><td>—</td><td>SF=0</td><td>Sign flag clear</td></tr>
+    <tr><td><code>jo</code></td><td>—</td><td>OF=1</td><td>Signed overflow occurred</td></tr>
+    <tr><td><code>jno</code></td><td>—</td><td>OF=0</td><td>No signed overflow</td></tr>
+    <tr><td><code>jp</code></td><td><code>jpe</code></td><td>PF=1</td><td>Parity even</td></tr>
+    <tr><td><code>jnp</code></td><td><code>jpo</code></td><td>PF=0</td><td>Parity odd</td></tr>
+  </table>
+
+  <div class="callout danger">
+    <div class="label">Critical: Signed vs Unsigned Jumps</div>
+    After <code>cmp rax, rbx</code>, choosing <code>jl</code> vs <code>jb</code> is critical: <strong>jl</strong> (signed less) checks SF≠OF; <strong>jb</strong> (unsigned below) checks CF=1. For the values 200 (unsigned) and -56 (signed), both are <code>0xFFFFFFFFFFFFFFC8</code> — the CPU cannot tell which you intend. You must choose the right jump. Using the wrong one is the source of "signed/unsigned comparison" bugs that can be weaponised.
+  </div>
+
+  <h2>Translating C Control Structures to Assembly</h2>
+
+  <h3>if / else if / else</h3>
+  <pre><code><span class="comment">; C: if (r12 > 0) { ... } else if (r12 == 0) { ... } else { ... }</span>
+    <span class="kw">cmp</span>  <span class="reg">r12</span>, <span class="num">0</span>
+    <span class="kw">jg</span>   <span class="lbl">.is_positive</span>    <span class="comment">; signed greater</span>
+    <span class="kw">je</span>   <span class="lbl">.is_zero</span>
+    <span class="comment">; else falls through here</span>
+    <span class="comment">; ... negative code ...</span>
+    <span class="kw">jmp</span>  <span class="lbl">.done</span>
+<span class="lbl">.is_positive:</span>
+    <span class="comment">; ... positive code ...</span>
+    <span class="kw">jmp</span>  <span class="lbl">.done</span>
+<span class="lbl">.is_zero:</span>
+    <span class="comment">; ... zero code ...</span>
+<span class="lbl">.done:</span></code></pre>
+
+  <h3>while loop</h3>
+  <pre><code><span class="comment">; C: while (rax > 0) { use(rax); rax -= 3; }</span>
+<span class="lbl">.while_top:</span>                  <span class="comment">; condition check at top</span>
+    <span class="kw">cmp</span>  <span class="reg">rax</span>, <span class="num">0</span>
+    <span class="kw">jle</span>  <span class="lbl">.while_done</span>       <span class="comment">; exit if rax <= 0</span>
+    <span class="comment">; ... loop body ...</span>
+    <span class="kw">sub</span>  <span class="reg">rax</span>, <span class="num">3</span>
+    <span class="kw">jmp</span>  <span class="lbl">.while_top</span>
+<span class="lbl">.while_done:</span></code></pre>
+
+  <h3>for loop (count down — preferred in assembly)</h3>
+  <pre><code><span class="comment">; C: for (int i = 5; i > 0; i--) { use(i); }</span>
+    <span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="num">5</span>
+<span class="lbl">.for_loop:</span>
+    <span class="comment">; ... loop body using rcx ...</span>
+    <span class="kw">dec</span>  <span class="reg">rcx</span>
+    <span class="kw">jnz</span>  <span class="lbl">.for_loop</span>        <span class="comment">; jump back while rcx != 0</span>
+<span class="comment">; Counting DOWN is preferred: the terminal condition (== 0) is free from dec,
+; so no separate cmp instruction is needed. Saves one instruction per iteration.</span></code></pre>
+
+  <h3>switch via jump table</h3>
+  <pre><code><span class="comment">; A jump table is an array of code addresses in .data</span>
+<span class="kw">section</span> .data
+    jump_table  <span class="kw">dq</span> case_0, case_1, case_2, case_3, case_4
+
+<span class="kw">section</span> .text
+    <span class="kw">cmp</span>  <span class="reg">r13</span>, <span class="num">4</span>
+    <span class="kw">ja</span>   <span class="lbl">.default</span>           <span class="comment">; unsigned: handle out-of-range</span>
+
+    <span class="kw">lea</span>  <span class="reg">rbx</span>, [<span class="kw">rel</span> jump_table]
+    <span class="kw">mov</span>  <span class="reg">rbx</span>, [<span class="reg">rbx</span> + <span class="reg">r13</span>*<span class="num">8</span>]  <span class="comment">; load address: table[index] (each entry = 8 bytes)</span>
+    <span class="kw">jmp</span>  <span class="reg">rbx</span>                  <span class="comment">; jump to the case handler</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — Jump Tables in Exploits</div>
+    Jump tables are a target in exploitation. If an attacker can write to the jump table (a writable <code>.data</code> section), they can redirect any switch dispatch to arbitrary code. This is why production compilers place jump tables in <code>.rodata</code> (read-only) and use RIP-relative offsets rather than absolute addresses. When you see a jump table in disassembly during malware analysis, check whether it is in a writable section — that may indicate intentional obfuscation or a vulnerability.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_06 &amp;&amp; make &amp;&amp; ./control<br/>
+    <span class="out">=== if / else if / else ===<br/>
+  value is negative<br/>
+  value is negative<br/>
+  ...repeated...<br/>
+  value is zero<br/>
+  value is positive<br/>
+=== while loop ===<br/>
+  15<br/>  12<br/>  9<br/>  6<br/>  3<br/>
+=== for loop (countdown) ===<br/>
+  5<br/>  4<br/>  3<br/>  2<br/>  1<br/>
+=== switch via jump table ===<br/>
+case 0: zero<br/>
+case 1: one<br/>
+case 2: two<br/>
+case 3: three<br/>
+case 4: four<br/>
+default: out of range</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Trace the jump table</h4>
+    <p>Run <code>objdump -d -M intel control</code>. Find the <code>jmp rbx</code> instruction and the <code>jump_table</code> symbol. Set a breakpoint in GDB at the <code>jmp rbx</code> instruction and run with <code>r13=2</code> (modify the register with <code>set $r13=2</code> before stepping). What address does <code>rbx</code> hold? Use <code>x/i $rbx</code> to confirm it points to <code>case_2</code>.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Implement a do-while loop</h4>
+    <p>A do-while loop places the condition check at the <em>bottom</em>: the body always runs at least once. Implement: <code>do { print(rax); rax++; } while (rax &lt; 5);</code>. Note that the condition check at the bottom means you don't need a <code>jmp</code> to get back to the top — the conditional branch does both jobs.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. Signed vs unsigned: spot the difference</h4>
+    <p>Set <code>rax = 0xFFFFFFFFFFFFFFFF</code> (which is -1 signed and 18446744073709551615 unsigned). Compare it with 0 using <code>cmp rax, 0</code>. Then branch with both <code>jg .big</code> and <code>ja .big</code>. Which branch is taken? Why? Confirm in GDB by checking which path executes.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. FizzBuzz in assembly</h4>
+    <p>Implement FizzBuzz for 1–20 entirely in assembly: for each number, print "Fizz" if divisible by 3, "Buzz" if divisible by 5, "FizzBuzz" if both, else print the number. Use <code>div</code> or <code>idiv</code> with 3 and 5, check <code>rdx</code> (the remainder), and use conditional jumps to decide which string to print.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_07/tutorial.html" style="color:inherit;">What's Next — Module 07: The Call Stack</a></h2>
+    <p>Module 06 taught you how to redirect <code>rip</code> with jumps. Module 07 teaches <code>call</code> and <code>ret</code> — the instructions that <em>save and restore</em> <code>rip</code> to enable returning from functions. The new file is <code>stack.asm</code>, which builds three levels of nested procedure calls and uses GDB's <code>x/32gx $rsp</code> command to read the entire stack frame chain live — the same technique used to analyse crash dumps and exploit payloads.</p>
+  </div>
+</div>
+</body>
+</html>

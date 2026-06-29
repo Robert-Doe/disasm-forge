@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 21 — Capstone: Mini x86-64 Disassembler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,#0d1420 0%,#0b1a2e 40%,#0f0b1e 100%);border-bottom:2px solid var(--gold);padding:70px 40px 60px;max-width:900px;margin:0 auto;}
+  .badge-row{display:flex;gap:12px;margin-bottom:28px;flex-wrap:wrap;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;text-transform:uppercase;}
+  .badge.gold{background:#2a1f00;color:var(--gold);border:1px solid #4a3800;}
+  h1{font-family:'Playfair Display',serif;font-size:3rem;color:var(--gold);line-height:1.15;margin-bottom:20px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:680px;line-height:1.7;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}.str{color:var(--green);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.security{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}
+  .callout.insight .label{color:var(--purple);}.callout.security .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;font-size:14px;}
+  th{background:var(--bg3);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:1px;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border);}
+  td{padding:9px 14px;border-bottom:1px solid var(--border);vertical-align:top;}
+  tr:nth-child(even) td{background:#0d1220;}
+  td:first-child{font-family:'Source Code Pro',monospace;color:var(--orange);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:13px;margin:16px 0;line-height:1.7;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .encoding-row{display:flex;gap:0;margin:16px 0;font-family:'Source Code Pro',monospace;font-size:13px;}
+  .enc-cell{border:1px solid var(--border);padding:8px 12px;text-align:center;min-width:60px;}
+  .enc-cell.prefix{background:#0a1a2a;color:var(--cyan);}
+  .enc-cell.opcode{background:#1a0a1a;color:var(--purple);}
+  .enc-cell.modrm{background:#1a1a0a;color:var(--orange);}
+  .enc-cell.sib{background:#0a1a0a;color:var(--green);}
+  .enc-cell.disp{background:#0d0d1a;color:var(--muted);}
+  .enc-cell.imm{background:#1a0d0a;color:var(--red);}
+  .enc-label{font-size:10px;display:block;color:var(--muted);margin-top:4px;}
+  .course-complete{background:linear-gradient(135deg,#0d1a08,#081a12);border:2px solid var(--gold);border-radius:12px;padding:36px 40px;margin:60px 0 20px;text-align:center;}
+  .course-complete h2{color:var(--gold);border:none;margin:0 0 16px;}
+  .course-complete p{color:var(--muted);max-width:600px;margin:0 auto;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge-row">
+    <div class="badge">Module 21 of 21</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+    <div class="badge gold">Capstone Project</div>
+    <div class="badge">Final Module</div>
+  </div>
+  <h1>Capstone: Mini x86-64 Disassembler</h1>
+  <p class="subtitle">You write a length-disassembler in pure assembly. Given a byte buffer, it identifies each instruction's length, opcode, ModRM/SIB structure, displacement, and immediate — then formats a disassembly listing. This is how every disassembler (IDA, Ghidra, objdump) works at its core.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; All prior modules. This capstone uses: register encoding (Mod 03), addressing modes (Mod 10), string ops (Mod 11), syscalls (Mod 15), linker/symbols (Mod 16), inline asm / C interop (Mod 17), RE methodology (Mod 19).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>capstone/disasm.asm</code> — the disassembler engine in pure x86-64 assembly</li>
+    <li><code>capstone/disasm.h</code> — C interface header (<code>DisasmInsn</code> struct, extern declarations)</li>
+    <li><code>capstone/main.c</code> — test driver: opcode buffer, syscall sequence, length accuracy suite, self-disassembly</li>
+  </ul></div>
+
+  <h2>The x86-64 Instruction Encoding</h2>
+  <p>Every x86-64 instruction is a variable-length byte sequence with up to six fields:</p>
+  <div class="encoding-row">
+    <div class="enc-cell prefix">Legacy Pfx<br/><span class="enc-label">0–4 bytes<br/>66/67/F0/F2/F3</span></div>
+    <div class="enc-cell prefix">REX<br/><span class="enc-label">0–1 byte<br/>4x</span></div>
+    <div class="enc-cell opcode">Opcode<br/><span class="enc-label">1–3 bytes<br/>xx / 0F xx</span></div>
+    <div class="enc-cell modrm">ModRM<br/><span class="enc-label">0–1 byte<br/>mod/reg/rm</span></div>
+    <div class="enc-cell sib">SIB<br/><span class="enc-label">0–1 byte<br/>scale/idx/base</span></div>
+    <div class="enc-cell disp">Disp<br/><span class="enc-label">0/1/4 bytes</span></div>
+    <div class="enc-cell imm">Imm<br/><span class="enc-label">0/1/2/4/8 bytes</span></div>
+  </div>
+  <p>A disassembler reads these fields left-to-right. The hard part: <strong>which fields are present, and how many bytes each field occupies, depends entirely on the opcode</strong>. There is no universal header. This is why x86-64 instruction encoding is famously complex — and why security researchers must understand it deeply.</p>
+
+  <h2>REX Prefix — Extending the Register Space</h2>
+  <p>The REX prefix (<code>0x40</code>–<code>0x4F</code>) was added in AMD64 to extend the original 8 integer registers to 16. It encodes four bits:</p>
+  <table>
+    <thead><tr><th>Bit</th><th>Name</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>REX.W (bit 3)</td><td>W</td><td>64-bit operand size (override default 32-bit)</td></tr>
+      <tr><td>REX.R (bit 2)</td><td>R</td><td>Extends ModRM reg field to access r8–r15</td></tr>
+      <tr><td>REX.X (bit 1)</td><td>X</td><td>Extends SIB index field to access r8–r15</td></tr>
+      <tr><td>REX.B (bit 0)</td><td>B</td><td>Extends ModRM r/m, SIB base, or opcode-embedded reg</td></tr>
+    </tbody>
+  </table>
+  <pre><code><span class="comment">; How to check REX bits in the disassembler:</span>
+<span class="kw">test</span>  <span class="reg">r15</span>, <span class="num">0x08</span>    <span class="comment">; REX.W — operand is 64-bit</span>
+<span class="kw">test</span>  <span class="reg">r15</span>, <span class="num">0x04</span>    <span class="comment">; REX.R — reg field +8</span>
+<span class="kw">test</span>  <span class="reg">r15</span>, <span class="num">0x02</span>    <span class="comment">; REX.X — SIB index +8</span>
+<span class="kw">test</span>  <span class="reg">r15</span>, <span class="num">0x01</span>    <span class="comment">; REX.B — r/m or base or opcode reg +8</span></code></pre>
+
+  <h2>The ModRM Byte</h2>
+  <p>When an instruction has a register-or-memory operand (<code>r/m</code>), a ModRM byte follows the opcode. It encodes:</p>
+  <table>
+    <thead><tr><th>Field</th><th>Bits</th><th>Values</th></tr></thead>
+    <tbody>
+      <tr><td>mod</td><td>7:6</td><td>00=indirect, 01=disp8, 10=disp32, 11=register</td></tr>
+      <tr><td>reg</td><td>5:3</td><td>Register operand (or opcode extension for groups)</td></tr>
+      <tr><td>r/m</td><td>2:0</td><td>Register or base-of-memory reference</td></tr>
+    </tbody>
+  </table>
+  <pre><code><span class="comment">; Extract ModRM fields:</span>
+<span class="kw">movzx</span> <span class="reg">eax</span>, <span class="kw">byte</span> [<span class="reg">rbx</span> + <span class="reg">r14</span>]   <span class="comment">; read ModRM</span>
+<span class="kw">mov</span>   <span class="reg">cl</span>, <span class="reg">al</span>
+<span class="kw">shr</span>   <span class="reg">cl</span>, <span class="num">6</span>                     <span class="comment">; cl = mod</span>
+<span class="kw">mov</span>   <span class="reg">bl</span>, <span class="reg">al</span>
+<span class="kw">shr</span>   <span class="reg">bl</span>, <span class="num">3</span>
+<span class="kw">and</span>   <span class="reg">bl</span>, <span class="num">7</span>                     <span class="comment">; bl = reg</span>
+<span class="kw">and</span>   <span class="reg">al</span>, <span class="num">7</span>                     <span class="comment">; al = r/m</span></code></pre>
+
+  <h2>SIB Byte — Scaled Index Addressing</h2>
+  <p>When <code>r/m = 4</code> (RSP encoding) in <code>mod != 11</code>, a SIB byte follows. It enables <code>[base + index*scale + disp]</code>:</p>
+  <table>
+    <thead><tr><th>Field</th><th>Bits</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td>scale</td><td>7:6</td><td>Multiplier: 00=×1, 01=×2, 10=×4, 11=×8</td></tr>
+      <tr><td>index</td><td>5:3</td><td>Index register (RSP encoding = no index)</td></tr>
+      <tr><td>base</td><td>2:0</td><td>Base register (RBP in mod=00 = disp32 only)</td></tr>
+    </tbody>
+  </table>
+  <p>The SIB byte is why <code>[rsp+8]</code> in machine code looks different from <code>[rbp-8]</code> — RSP cannot serve as an index register, so the encoding for <code>r/m=4</code> was repurposed to signal "SIB byte follows."</p>
+
+  <h2>Displacement and Immediate Encoding</h2>
+  <p>Displacements are <strong>sign-extended</strong> — an 8-bit <code>-16</code> stored as <code>0xF0</code> becomes <code>-16</code> in a 64-bit register via <code>movsx</code>. This is critical for correct branch target computation:</p>
+  <pre><code><span class="comment">; Read disp8 and sign-extend to 32-bit:</span>
+<span class="kw">movsx</span>  <span class="reg">eax</span>, <span class="kw">byte</span> [<span class="reg">rbx</span> + <span class="reg">r14</span>]
+<span class="kw">mov</span>    <span class="kw">dword</span> [<span class="reg">r13</span> + <span class="num">INSN_DISP</span>], <span class="reg">eax</span>
+<span class="kw">inc</span>    <span class="reg">r14</span>
+
+<span class="comment">; CALL rel32 — the +5 accounts for the instruction's own length:</span>
+<span class="comment">; target = instruction_addr + 5 + rel32</span>
+<span class="kw">movsx</span>  <span class="reg">eax</span>, <span class="kw">dword</span> [<span class="reg">rbx</span> + <span class="reg">r14</span>]
+<span class="kw">mov</span>    <span class="kw">dword</span> [<span class="reg">r13</span> + <span class="num">INSN_IMM</span>], <span class="reg">eax</span>
+<span class="kw">add</span>    <span class="reg">r14</span>, <span class="num">4</span></code></pre>
+
+  <h2>Instruction Groups — The / Extension</h2>
+  <p>Some opcodes are <strong>groups</strong>: a single opcode byte covers multiple instructions, with the actual instruction determined by the <code>reg</code> field of ModRM. These are written as <code>opcode /N</code> in the Intel manual:</p>
+  <table>
+    <thead><tr><th>Opcode</th><th>/0</th><th>/1</th><th>/2</th><th>/3</th><th>/4</th><th>/5</th><th>/6</th><th>/7</th></tr></thead>
+    <tbody>
+      <tr><td>81</td><td>ADD</td><td>OR</td><td>ADC</td><td>SBB</td><td>AND</td><td>SUB</td><td>XOR</td><td>CMP</td></tr>
+      <tr><td>F7</td><td>TEST</td><td>—</td><td>NOT</td><td>NEG</td><td>MUL</td><td>IMUL</td><td>DIV</td><td>IDIV</td></tr>
+      <tr><td>FF</td><td>INC</td><td>DEC</td><td>CALL</td><td>CALL far</td><td>JMP</td><td>JMP far</td><td>PUSH</td><td>—</td></tr>
+    </tbody>
+  </table>
+  <pre><code><span class="comment">; Decode opcode group 81h:</span>
+<span class="kw">movzx</span> <span class="reg">eax</span>, <span class="kw">byte</span> [<span class="reg">rbx</span> + <span class="reg">r14</span>]   <span class="comment">; peek at ModRM (don't consume yet)</span>
+<span class="kw">mov</span>   <span class="reg">cl</span>, <span class="reg">al</span>
+<span class="kw">shr</span>   <span class="reg">cl</span>, <span class="num">3</span>
+<span class="kw">and</span>   <span class="reg">cl</span>, <span class="num">7</span>                     <span class="comment">; cl = reg field = subopcode</span>
+<span class="kw">cmp</span>   <span class="reg">cl</span>, <span class="num">7</span>
+<span class="kw">je</span>    <span class="lbl">.it_is_cmp</span>               <span class="comment">; /7 → CMP r/m, imm32</span></code></pre>
+
+  <h2>Two-Byte Escape: 0F Prefix</h2>
+  <p>When the opcode byte is <code>0F</code>, the next byte is the actual opcode. This doubling of the opcode space accommodates the many instructions added after the original 8086:</p>
+  <table>
+    <thead><tr><th>0F xx</th><th>Instruction</th></tr></thead>
+    <tbody>
+      <tr><td>0F 05</td><td>SYSCALL</td></tr>
+      <tr><td>0F 0B</td><td>UD2 (undefined — triggers #UD fault)</td></tr>
+      <tr><td>0F 40–4F</td><td>CMOVcc r64, r/m64</td></tr>
+      <tr><td>0F 80–8F</td><td>Jcc rel32 (long conditional jumps)</td></tr>
+      <tr><td>0F 90–9F</td><td>SETcc r/m8</td></tr>
+      <tr><td>0F AF</td><td>IMUL r64, r/m64</td></tr>
+      <tr><td>0F B6/B7</td><td>MOVZX r64, r/m8 / r/m16</td></tr>
+      <tr><td>0F BE/BF</td><td>MOVSX r64, r/m8 / r/m16</td></tr>
+    </tbody>
+  </table>
+
+  <h2>The DisasmInsn Struct Layout</h2>
+  <pre><code><span class="comment">; Struct layout — must match disasm.h exactly:</span>
+<span class="comment">; Offset   Size   Field</span>
+<span class="comment">;    0       1    length        (total bytes consumed)</span>
+<span class="comment">;    1       1    opcode        (primary opcode byte)</span>
+<span class="comment">;    2       1    has_rex</span>
+<span class="comment">;    3       1    rex</span>
+<span class="comment">;    4       1    has_modrm</span>
+<span class="comment">;    5       1    modrm</span>
+<span class="comment">;    6       1    has_sib</span>
+<span class="comment">;    7       1    sib</span>
+<span class="comment">;    8       4    disp  (int32, sign-extended)</span>
+<span class="comment">;   12       8    imm   (int64)</span>
+<span class="comment">;   20       1    op_type  (OP_NONE/REG/IMM/MEM/REL)</span>
+<span class="comment">;   21       3    padding</span>
+<span class="comment">;   24      64    mnemonic[64]</span>
+<span class="comment">;   88      64    operands[64]</span>
+<span class="comment">; Total: 152 bytes</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Why length matters most</div>
+    A disassembler that gets any instruction's <em>length</em> wrong will lose sync — every subsequent byte it reads will be misaligned, producing garbage output for the rest of the function. Length computation is the one property that must be exact. Mnemonic formatting can be approximate; length cannot. This is why the test suite has a dedicated length accuracy case.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_21 &amp;&amp; make<br/>
+    <span class="out">nasm -f elf64 -g -F dwarf -o capstone/disasm.o capstone/disasm.asm
+gcc -O0 -g -Wall -Wextra -Icapstone -c -o capstone/main.o capstone/main.c
+gcc -o disasm_test capstone/disasm.o capstone/main.o
+Built: disasm_test</span><br/><br/>
+    <span class="prompt">$ </span>./disasm_test<br/>
+    <span class="out">╔══════════════════════════════════════════════╗
+║   Module 21 — Mini x86-64 Disassembler      ║
+╚══════════════════════════════════════════════╝
+
+=== Representative x86-64 opcodes (42 bytes) ===
+  Bytes                    Mnemonic  Operands
+  ─────────────────────────────────────────────
+  0000: 90                 nop
+  0001: 55                 push  rbp
+  0002: 48 89 e5           mov   rbp, rsp
+  0005: 48 81 ec 20000000  sub   [rsp], 0x00000020
+  000c: 48 b8 4847464544434241  mov  rax, 0x4142434445464748
+  0016: 48 33 c0           xor   rax, rax
+  0019: 48 3b c3           cmp   rax, rbx
+  001c: 74 04              jz    0x00000004
+  001e: 75 f8              jnz   0xfffffff8
+  0020: e8 00000000        call  0x00000000
+  0025: e9 00000000        jmp   0x00000000
+  002a: c3                 ret
+  ─────────────────────────────────────────────
+  12 instruction(s) decoded
+
+=== Instruction length accuracy ===
+  [PASS] NOP                   expected=1  got=1
+  [PASS] RET                   expected=1  got=1
+  [PASS] INT3                  expected=1  got=1
+  [PASS] MOV rbp,rsp           expected=3  got=3
+  [PASS] MOV rax,imm64         expected=10 got=10
+  [PASS] CALL rel32            expected=5  got=5
+  [PASS] SYSCALL               expected=2  got=2
+  [PASS] SUB rsp,imm32         expected=7  got=7
+  [PASS] MOV rax,[rbp-16]      expected=4  got=4
+  [PASS] JZ rel32              expected=6  got=6
+  Result: 10 passed, 0 failed</span>
+  </div>
+
+  <h2>Meta: Disassembling the Disassembler</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>make meta<br/>
+    <span class="out">objdump -d -M intel capstone/disasm.o | head -120
+
+capstone/disasm.o:     file format elf64-x86-64
+
+Disassembly of section .text:
+
+0000000000000000 &lt;strcpy_small&gt;:
+   0: 48 89 f8              mov    rax,rdi
+   3: 8a 0e                 mov    cl,BYTE PTR [rsi]
+   5: 88 08                 mov    BYTE PTR [rax],cl
+   7: 48 ff c6              inc    rsi
+   a: 48 ff c0              inc    rax
+   d: 84 c9                 test   cl,cl
+   f: 75 f2                 jne    3 &lt;strcpy_small+0x3&gt;
+  11: 48 ff c8              dec    rax
+  14: c3                    ret
+...</span>
+  </div>
+
+  <p>You are reading assembly code of an assembly disassembler with an assembly disassembler. The recursion is intentional.</p>
+
+  <div class="callout security">
+    <div class="label">Security Application: Shellcode Analysis</div>
+    A length-disassembler is the first building block of a shellcode scanner. To check whether a buffer contains a syscall instruction (<code>0F 05</code>), a sandbox needs to decode every instruction to find the opcode — scanning for <code>0F 05</code> bytes is insufficient because those bytes might appear as data inside a longer instruction's immediate field. The disassembler core you built here prevents that false-negative by correctly computing lengths first, then checking opcodes.
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Decode a raw ELF section</h4>
+    <p>Use the ELF reader from Module 14 to locate the <code>.text</code> section of any compiled binary, extract the raw bytes, and pass them to <code>disasm_decode</code> in a loop. Print the first 30 instructions. Compare your output against <code>objdump -d -M intel</code>. How many instructions match exactly?</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Add PUSH/POP xmm register support (66-prefixed SSE2)</h4>
+    <p>The legacy prefix <code>0x66</code> overrides operand size to 16 bits for integer ops, but also prefixes many SSE2 instructions (<code>66 0F 58</code> = <code>addpd</code>). Extend the decoder to handle the <code>66</code> prefix: store it in a <code>has_66_prefix</code> field, and add cases for <code>66 0F 58</code> (addpd), <code>66 0F 59</code> (mulpd), <code>66 0F 57</code> (xorpd). Run your decoder against the <code>simd.o</code> from Module 13 and verify the SSE2 instructions decode correctly.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Implement a simple control-flow graph builder in C</h4>
+    <p>Using the disassembler as a library, write a C function <code>build_cfg(uint8_t *code, size_t len, uint64_t base_addr)</code> that: (1) starts at offset 0; (2) decodes each instruction and checks if it is an unconditional branch (<code>JMP</code>), conditional branch (<code>Jcc</code>), or <code>RET</code>/<code>INT3</code>/<code>UD2</code>; (3) adds the branch targets to a work queue; (4) traces all reachable code. Print a list of basic block entry addresses. Test it on the <code>target_state_machine</code> binary from Module 19 — your basic block list should match what Ghidra or objdump's control flow analysis produces.</p>
+  </div>
+
+  <div class="course-complete">
+    <h2>Course Complete</h2>
+    <p>You have completed all 21 modules of the x86-64 Assembly course. You can now read and write assembly at the level required for exploit development, reverse engineering, shellcode analysis, compiler output auditing, and bare-metal systems programming. The tools you understand — disassemblers, linkers, syscall ABIs, binary formats — are the same tools used by every security researcher and systems programmer working at the hardware interface. What you do with them is up to you.</p>
+  </div>
+</div>
+</body>
+</html>

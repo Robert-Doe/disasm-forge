@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 09 — Calling Conventions & the ABI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}a{color:var(--cyan);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+  .abi-compare{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0;}
+  .abi-box{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px;}
+  .abi-box h4{font-family:'Source Code Pro',monospace;font-size:14px;margin-bottom:12px;}
+  .abi-linux h4{color:var(--green);}
+  .abi-windows h4{color:var(--cyan);}
+  .abi-box table{margin:0;}
+  .abi-box th{font-size:12px;padding:6px 10px;}
+  .abi-box td{font-size:13px;padding:6px 10px;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 09 of 21 &mdash; Core Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Calling Conventions &amp; the ABI</h1>
+  <p class="subtitle">System V AMD64 (Linux) vs Microsoft x64 (Windows) — argument registers, shadow space, xmm args, variadic functions, struct returns — the complete ABI reference with working cross-platform code.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Modules 01–08: stack frames, callee-saved registers, push/pop mechanics all memorised.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>abi.asm</code> — calls a C function with 7 integer args (one on the stack), passes 4 doubles via xmm registers, and receives two return values in rax:rdx — all done correctly for both Linux and Windows using <code>%ifdef WIN64</code></li>
+    <li><code>abi_caller.c</code> — the C side that receives the calls and calls back into <code>asm_callback</code></li>
+    <li>A permanent reference for both ABIs that you can consult every time you write cross-platform asm</li>
+  </ul></div>
+
+  <h2>What Is an ABI?</h2>
+  <p>An Application Binary Interface (ABI) is the contract between separately compiled pieces of code. It specifies: which registers carry function arguments, which register carries the return value, which registers a function is allowed to destroy, how the stack must be aligned, and how structs are passed and returned. If two pieces of code use different ABIs, they cannot interoperate — arguments land in the wrong registers, the stack gets corrupted, and the program crashes in ways that are nearly impossible to debug without knowing the ABI.</p>
+  <p>x86-64 has two dominant ABIs. They are not compatible. Every time you write assembly that interfaces with C code, you must know which ABI is in use.</p>
+
+  <h2>Side-by-Side ABI Comparison</h2>
+  <div class="abi-compare">
+    <div class="abi-box abi-linux">
+      <h4>System V AMD64 — Linux / macOS</h4>
+      <table>
+        <tr><th>Arg #</th><th>Integer</th><th>Float</th></tr>
+        <tr><td>1</td><td><code>rdi</code></td><td><code>xmm0</code></td></tr>
+        <tr><td>2</td><td><code>rsi</code></td><td><code>xmm1</code></td></tr>
+        <tr><td>3</td><td><code>rdx</code></td><td><code>xmm2</code></td></tr>
+        <tr><td>4</td><td><code>rcx</code></td><td><code>xmm3</code></td></tr>
+        <tr><td>5</td><td><code>r8</code></td><td><code>xmm4</code></td></tr>
+        <tr><td>6</td><td><code>r9</code></td><td><code>xmm5</code></td></tr>
+        <tr><td>7+</td><td colspan="2">Stack (right-to-left push)</td></tr>
+      </table>
+    </div>
+    <div class="abi-box abi-windows">
+      <h4>Microsoft x64 — Windows</h4>
+      <table>
+        <tr><th>Arg #</th><th>Integer</th><th>Float</th></tr>
+        <tr><td>1</td><td><code>rcx</code></td><td><code>xmm0</code></td></tr>
+        <tr><td>2</td><td><code>rdx</code></td><td><code>xmm1</code></td></tr>
+        <tr><td>3</td><td><code>r8</code></td><td><code>xmm2</code></td></tr>
+        <tr><td>4</td><td><code>r9</code></td><td><code>xmm3</code></td></tr>
+        <tr><td>5+</td><td colspan="2">Stack (right-to-left push)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Property</th><th>System V AMD64</th><th>Microsoft x64</th></tr>
+    <tr><td>Return value</td><td><code>rax</code> (int), <code>xmm0</code> (float)</td><td><code>rax</code> (int), <code>xmm0</code> (float)</td></tr>
+    <tr><td>2nd return value</td><td><code>rdx</code></td><td><code>rdx</code></td></tr>
+    <tr><td>Caller-saved</td><td><code>rax rcx rdx rsi rdi r8 r9 r10 r11</code></td><td><code>rax rcx rdx r8 r9 r10 r11</code></td></tr>
+    <tr><td>Callee-saved</td><td><code>rbx rbp r12-r15</code></td><td><code>rbx rbp rsi rdi r12-r15 xmm6-xmm15</code></td></tr>
+    <tr><td>Shadow space</td><td>None</td><td>32 bytes (caller provides, callee may spill regs there)</td></tr>
+    <tr><td>Stack alignment</td><td>16-byte before call</td><td>16-byte before call</td></tr>
+    <tr><td>Red zone</td><td>128 bytes below rsp</td><td>None</td></tr>
+  </table>
+
+  <div class="callout danger">
+    <div class="label">rsi and rdi are CALLEE-SAVED on Windows</div>
+    On Linux, <code>rsi</code> and <code>rdi</code> are caller-saved (used as argument registers). On Windows, they are <strong>callee-saved</strong>. A function that uses <code>rsi</code>/<code>rdi</code> on Windows must push them at entry and pop them before return. Linux asm code ported to Windows that uses <code>rsi</code>/<code>rdi</code> as scratch registers will silently corrupt the caller's values. This is one of the most common ABI porting bugs.
+  </div>
+
+  <h2>The Windows Shadow Space</h2>
+  <p>The Microsoft x64 ABI requires the <strong>caller</strong> to allocate 32 bytes of "home space" (also called "shadow space") immediately before calling any function. The callee may use these 32 bytes to spill its first four register arguments for debugging or for stack-based access. The caller does not need to fill these bytes — just allocate the space.</p>
+
+  <pre><code><span class="comment">; Windows: calling a function with 5 arguments</span>
+<span class="kw">sub</span>  <span class="reg">rsp</span>, <span class="num">40</span>          <span class="comment">; 32 shadow + 8 for arg5 (keep 16-byte alignment)</span>
+<span class="kw">mov</span>  <span class="kw">qword</span> [<span class="reg">rsp</span>+<span class="num">32</span>], <span class="num">5</span>  <span class="comment">; arg5 lives above the shadow space</span>
+<span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="num">1</span>            <span class="comment">; arg1</span>
+<span class="kw">mov</span>  <span class="reg">rdx</span>, <span class="num">2</span>            <span class="comment">; arg2</span>
+<span class="kw">mov</span>  <span class="reg">r8</span>,  <span class="num">3</span>            <span class="comment">; arg3</span>
+<span class="kw">mov</span>  <span class="reg">r9</span>,  <span class="num">4</span>            <span class="comment">; arg4</span>
+<span class="kw">call</span> <span class="lbl">some_function</span>
+<span class="kw">add</span>  <span class="reg">rsp</span>, <span class="num">40</span>          <span class="comment">; release shadow + arg5 space</span></code></pre>
+
+  <h2>Floating-Point Arguments</h2>
+  <p>Both ABIs pass floating-point arguments in <code>xmm0</code>–<code>xmm3</code> (Windows) or <code>xmm0</code>–<code>xmm7</code> (Linux). For variadic functions, the System V ABI requires setting <code>al</code> to the number of xmm registers used, so the callee knows how many to save.</p>
+  <pre><code><span class="comment">; Load doubles into xmm0-xmm3 and call a C function</span>
+<span class="kw">movsd</span>  <span class="reg">xmm0</span>, [<span class="kw">rel</span> <span class="lbl">val1</span>]   <span class="comment">; first double arg</span>
+<span class="kw">movsd</span>  <span class="reg">xmm1</span>, [<span class="kw">rel</span> <span class="lbl">val2</span>]   <span class="comment">; second double arg</span>
+<span class="kw">mov</span>    <span class="reg">al</span>, <span class="num">2</span>              <span class="comment">; System V: 2 xmm registers used (variadic callee)</span>
+<span class="kw">call</span>   <span class="lbl">c_function</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — ABI in Exploit Development</div>
+    When writing shellcode or ROP chains that call Windows API functions, you must follow the Microsoft x64 ABI exactly: allocate 32 bytes of shadow space, pass args in rcx/rdx/r8/r9, preserve rsi/rdi/rbx/r12–r15. A ROP chain that calls <code>VirtualProtect</code> without providing shadow space will crash inside the function when it tries to spill its arguments. This is why shellcode often sets <code>rsp</code> to a predictable location before calling APIs — to ensure the shadow space is always available.
+  </div>
+
+  <h2>Conditional Assembly for Cross-Platform ABI</h2>
+  <pre><code><span class="comment">; abi.asm — handle both ABIs in one file</span>
+<span class="kw">%ifdef</span> WIN64
+    <span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="num">1</span>     <span class="comment">; arg1 on Windows</span>
+    <span class="kw">mov</span>  <span class="reg">rdx</span>, <span class="num">2</span>     <span class="comment">; arg2 on Windows</span>
+<span class="kw">%else</span>
+    <span class="kw">mov</span>  <span class="reg">rdi</span>, <span class="num">1</span>     <span class="comment">; arg1 on Linux</span>
+    <span class="kw">mov</span>  <span class="reg">rsi</span>, <span class="num">2</span>     <span class="comment">; arg2 on Linux</span>
+<span class="kw">%endif</span>
+<span class="kw">call</span> <span class="lbl">some_function</span>
+
+<span class="comment">; Makefile passes -DWIN64 on Windows, nothing on Linux</span>
+<span class="comment">; nasm -f win64 -DWIN64 abi.asm   (Windows)</span>
+<span class="comment">; nasm -f elf64         abi.asm   (Linux)</span></code></pre>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_09 &amp;&amp; make &amp;&amp; ./abi<br/>
+    <span class="out">=== Passing 7 integer arguments (one lands on stack) ===<br/>
+  c_seven_args got: 1 2 3 4 5 6 7<br/>
+  asm_callback(1) = 2<br/>
+  28 (0x1C)<br/>
+=== Passing float arguments via xmm0-xmm3 ===<br/>
+  c_float_args got: 1.00 2.50 3.75 4.00<br/>
+  sum = 11.25<br/>
+=== Two return values: rax and rdx ===<br/>
+  57005 (0xDEAD)<br/>
+  48879 (0xBEEF)</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Verify argument register order in GDB</h4>
+    <p>Break at the entry of <code>c_seven_args</code> in GDB. Print all registers: <code>info registers</code>. On Linux, confirm that <code>rdi=1, rsi=2, rdx=3, rcx=4, r8=5, r9=6</code>, and that the 7th argument (7) is on the stack at <code>[rsp+8]</code> (above the return address). On Windows, confirm <code>rcx=1, rdx=2, r8=3, r9=4</code> with args 5–7 on the stack.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Call printf directly from assembly</h4>
+    <p>Write an asm function that calls the C <code>printf</code> function with a format string and two integer arguments. On Linux: format in <code>rdi</code>, args in <code>rsi</code>/<code>rdx</code>, <code>al=0</code>. On Windows: format in <code>rcx</code>, args in <code>rdx</code>/<code>r8</code>. Ensure the stack is 16-byte aligned before the call and the shadow space is allocated on Windows.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Verify callee-saved xmm registers on Windows</h4>
+    <p>On Windows, <code>xmm6</code>–<code>xmm15</code> are callee-saved. Load a known value into <code>xmm6</code> in main, call a C function that uses xmm registers internally, then read <code>xmm6</code> back using <code>movsd [rsp-8], xmm6; mov rax, [rsp-8]</code> and print it. It should be unchanged. Then write a C function that deliberately doesn't preserve <code>xmm6</code> and observe the corruption.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_10/tutorial.html" style="color:inherit;">What's Next — Module 10: Memory Addressing Modes</a></h2>
+    <p>Module 09 completed your understanding of how functions talk to each other. Module 10 completes your understanding of how instructions talk to memory: all five addressing mode families — immediate, register, direct, register-indirect, and scaled-index (<code>[base + index*scale + displacement]</code>) — plus RIP-relative addressing for position-independent code. The new file is <code>addressing.asm</code>, which walks a 2D array using scaled-index addressing so you can see exactly how the compiler accesses multi-dimensional data structures.</p>
+  </div>
+</div>
+</body>
+</html>

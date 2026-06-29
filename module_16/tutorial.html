@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 16 — Linker & Loader Internals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:13px;margin:16px 0;line-height:1.7;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .flow{display:flex;gap:0;align-items:center;margin:20px 0;flex-wrap:wrap;}
+  .flow-box{background:var(--card);border:1px solid var(--border);border-radius:6px;padding:10px 16px;font-family:'Source Code Pro',monospace;font-size:13px;text-align:center;min-width:100px;}
+  .flow-arrow{color:var(--muted);padding:0 8px;font-size:18px;}
+  .flow-box.highlight{border-color:var(--gold);color:var(--gold);}
+  .flow-box.active{border-color:var(--cyan);color:var(--cyan);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 16 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Linker &amp; Loader Internals</h1>
+  <p class="subtitle">Object files contain unresolved references — placeholders with relocation entries. The linker collects all object files, resolves every symbol to an address, patches the placeholders, and writes the final binary. The dynamic loader repeats this for shared libraries at runtime.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 14 (ELF sections and symbol table), Module 15 (entry point, <code>extern</code>/<code>global</code> in NASM).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>a.asm</code> — defines <code>a_multiply</code>, <code>a_message</code>; calls <code>b_add</code>, reads <code>b_counter</code></li>
+    <li><code>b.asm</code> — defines <code>b_add</code>, <code>b_counter</code>; calls back into <code>a_multiply</code></li>
+    <li><code>link_helper.c</code> — C helper + <code>c_link_demo()</code> showing C ↔ assembly symbol sharing</li>
+  </ul></div>
+
+  <h2>The Compilation Pipeline</h2>
+  <div class="flow">
+    <div class="flow-box">a.asm</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box active">nasm<br/>-f elf64</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">a.o</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box highlight">ld / gcc<br/>(linker)</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">link_demo</div>
+  </div>
+  <div class="flow" style="margin-top:4px;">
+    <div class="flow-box">b.asm</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box active">nasm<br/>-f elf64</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box">b.o</div>
+    <div class="flow-arrow" style="opacity:0">→</div>
+    <div class="flow-box" style="opacity:0">x</div>
+    <div class="flow-arrow" style="opacity:0">→</div>
+    <div class="flow-box" style="opacity:0">x</div>
+  </div>
+
+  <h2>What is a Relocation Entry?</h2>
+  <p>When the assembler encounters <code>call b_add</code>, it does not know where <code>b_add</code> will live — that depends on the final link order. So it writes zeros (or a placeholder) into the call instruction's target field and records a <strong>relocation entry</strong>:</p>
+
+  <pre><code><span class="comment">; In a.o's relocation table:</span>
+<span class="comment">; Offset    Type        Symbol     Addend</span>
+<span class="comment">; 0x3A      R_X86_64_PC32  b_add    -4</span>
+<span class="comment">;           ↑              ↑        ↑</span>
+<span class="comment">;     byte in a.o       symbol   adjustment for PC-relative</span></code></pre>
+
+  <p>When the linker runs, it:</p>
+  <ol>
+    <li>Scans all <code>.o</code> files, collects every <strong>defined</strong> symbol and its address in the final layout</li>
+    <li>Scans all <strong>undefined</strong> references (relocations) and matches them to definitions</li>
+    <li>Writes the correct address into each relocation slot in the output binary</li>
+  </ol>
+
+  <h2>Seeing Relocations with objdump</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>make &amp;&amp; make relocs<br/>
+    <span class="out">=== Relocations in a.o ===
+RELOCATION RECORDS FOR [.text]:
+OFFSET           TYPE              VALUE
+0000000000000047 R_X86_64_PC32     b_add-0x0000000000000004
+000000000000005b R_X86_64_PC32     b_counter-0x0000000000000004
+000000000000007a R_X86_64_PC32     a_multiply-0x0000000000000004
+...
+
+=== Relocations in b.o ===
+RELOCATION RECORDS FOR [.text]:
+OFFSET           TYPE              VALUE
+0000000000000039 R_X86_64_PC32     a_multiply-0x0000000000000004</span>
+  </div>
+
+  <div class="callout insight">
+    <div class="label">R_X86_64_PC32 — PC-relative 32-bit relocation</div>
+    This is the relocation type for <code>call</code> and <code>jmp</code> instructions in 64-bit x86. The CPU encodes the target as a <em>signed 32-bit offset from the next instruction's address</em> (Program Counter relative). The linker computes: <code>patch_value = symbol_address - (relocation_offset + 4)</code>. The <code>-4</code> addend in the relocation record accounts for the 4-byte encoding of the offset itself. All this is why near calls can only reach ±2 GB from the call site — the 32-bit signed displacement limit.
+  </div>
+
+  <h2>extern and global in NASM</h2>
+  <pre><code><span class="comment">; In a.asm:</span>
+<span class="kw">extern</span> <span class="lbl">b_add</span>        <span class="comment">; "I reference this symbol — linker must find it elsewhere"</span>
+<span class="kw">global</span> <span class="lbl">a_multiply</span>   <span class="comment">; "I define this symbol — export it for other units"</span>
+
+<span class="comment">; In b.asm:</span>
+<span class="kw">extern</span> <span class="lbl">a_multiply</span>   <span class="comment">; references a.asm's export</span>
+<span class="kw">global</span> <span class="lbl">b_add</span>        <span class="comment">; satisfies a.asm's extern declaration</span></code></pre>
+
+  <h2>Symbol Visibility Rules</h2>
+  <table>
+    <tr><th>Declaration</th><th>Scope</th><th>Appears in symbol table?</th></tr>
+    <tr><td><code>global name</code></td><td>Exported — visible to all linked units</td><td>Yes, STB_GLOBAL</td></tr>
+    <tr><td>Label without global</td><td>Local — only visible within this .o file</td><td>Yes, STB_LOCAL (stripped by default)</td></tr>
+    <tr><td><code>extern name</code></td><td>Undefined reference — linker must resolve</td><td>Yes, SHN_UNDEF until resolved</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <div class="label">nm — inspect symbols</div>
+    After building, run <code>make syms</code> (calls <code>nm -n link_demo</code>) to see the final resolved addresses of all four cross-unit symbols. The lowercase type letter <code>t</code> means local code; uppercase <code>T</code> means global (exported) code; <code>D</code> means global data in <code>.data</code>.
+  </div>
+
+  <h2>PLT and GOT — Dynamic Linking at Runtime</h2>
+  <p>When your binary calls a shared library function (like <code>printf</code>), the linker cannot know the final address — it depends on where <code>libc.so</code> is loaded in memory (randomized by ASLR). Instead it creates two structures:</p>
+  <ul>
+    <li><strong>PLT (Procedure Linkage Table)</strong> — a stub in your binary's <code>.plt</code> section. Every call to <code>printf</code> actually calls <code>printf@plt</code>.</li>
+    <li><strong>GOT (Global Offset Table)</strong> — a table of 8-byte pointers in <code>.got.plt</code>. Initially these point back into the PLT resolver. After the first call, the dynamic linker patches the GOT entry to point directly at the real function.</li>
+  </ul>
+
+  <pre><code><span class="comment">; First call to printf — what actually executes:</span>
+<span class="comment">; 1. call printf@plt  →  jumps to [got.plt entry for printf]</span>
+<span class="comment">; 2. GOT entry initially contains: address of plt resolver stub</span>
+<span class="comment">; 3. Resolver calls _dl_runtime_resolve(link_map, reloc_index)</span>
+<span class="comment">; 4. Dynamic linker finds printf in libc.so, writes real address into GOT</span>
+<span class="comment">; 5. Execution jumps to real printf</span>
+<span class="comment">;</span>
+<span class="comment">; Second call to printf:</span>
+<span class="comment">; 1. call printf@plt  →  jumps to [got.plt entry for printf]</span>
+<span class="comment">; 2. GOT entry now contains real printf address → direct jump</span></code></pre>
+
+  <div class="callout danger">
+    <div class="label">Security — GOT Overwrite Attacks</div>
+    The GOT is a writable table of function pointers in the process's data segment. If an attacker can write an arbitrary 8-byte value to a GOT entry (via a buffer overflow, format string write, or use-after-free), the next call to that library function jumps to the attacker's address. This is the basis of GOT overwrite exploitation — a classic technique for turning an arbitrary-write primitive into code execution. Modern mitigations: <strong>RELRO</strong> (RELocation Read-Only) marks the GOT read-only after the dynamic linker finishes resolving symbols (<code>-z relro -z now</code>), preventing this class of attack.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_16 &amp;&amp; make &amp;&amp; ./link_demo<br/>
+    <span class="out">=== Linker: cross-unit call a -> b_add ===
+  val: 42                    0x2A
+=== Shared data: b_counter read from A ===
+  val: 100                   0x64
+=== Self: a_multiply(7, 6) ===
+  val: 42                    0x2A
+=== Symbol addresses (relocation results) ===
+  val: 4198560               0x401260
+  val: 4198608               0x401290
+  val: 4198960               0x4013F0
+
+=== C calling assembly functions (PLT demo) ===
+  a_multiply(11,4) = 44
+  a_message = "Hello from compilation unit A"
+  b_counter = 100
+  b_add(100,23) = 123
+=== Unit B: b_add(x,y) called from A ===
+  val: 101                   0x65
+=== Unit B calling back into A: a_multiply ===
+  val: 54                    0x36
+
+=== Symbol addresses seen from C ===
+  &a_multiply = 0x401260
+  &b_add      = 0x401290
+  &a_message  = 0x4013F0
+  &b_counter  = 0x404050</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Verify relocation patching with GDB</h4>
+    <p>Build with <code>make</code>, then run <code>gdb ./link_demo</code>. Break at <code>main</code>, then <code>disassemble main</code>. Find the <code>call b_add</code> instruction. Note its address and the 4-byte relative displacement encoded in the instruction bytes. Manually compute <code>call_site_address + 4 + displacement</code> and verify it equals the address shown by <code>info address b_add</code>. This is the exact arithmetic the linker performed when patching the relocation.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Create a local-only function (no global)</h4>
+    <p>Add a function <code>b_internal_helper</code> to <code>b.asm</code> without declaring it <code>global</code>. Call it from <code>b_add</code>. Build, then run <code>nm link_demo | grep b_internal</code> — it will appear with lowercase <code>t</code> (local). Now try to call <code>b_internal_helper</code> from <code>a.asm</code> (with <code>extern b_internal_helper</code>) and observe the linker error: "undefined reference." This demonstrates that symbol visibility, not physical location, determines linkability.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Trace PLT/GOT lazy resolution with GDB</h4>
+    <p>Add a <code>printf("hello\n")</code> call in <code>link_helper.c</code>. Build, then run under GDB. Before calling printf, inspect <code>x/2gx 0x&lt;got_entry_for_printf&gt;</code> (find the address via <code>objdump -R ./link_demo | grep printf</code>). Step through the <em>first</em> call and watch the GOT entry change from the PLT resolver address to the real <code>printf</code> address in <code>libc.so</code>. After the first call completes, inspect the GOT entry again — it now points directly into libc. This is lazy binding in action.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_17/tutorial.html" style="color:inherit;">What's Next — Module 17: Inline Assembly &amp; Reading Compiler Output</a></h2>
+    <p>Module 17 bridges hand-written assembly and compiler-generated code. You will use GCC's <code>asm volatile</code> inline assembly to embed assembly snippets directly in C, with operand constraints controlling which registers the compiler allocates. You will then use <code>gcc -S -O2</code> to read compiler output and compare it against your hand-written versions — learning to recognize common compiler optimization patterns: strength reduction, loop unrolling, auto-vectorization, and tail-call optimization.</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 01 — Toolchain Setup &amp; Your First Assembly Program</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:      #0b0f1a;
+    --bg2:     #111827;
+    --bg3:     #1a2235;
+    --card:    #141c2e;
+    --border:  #1e3a5f;
+    --gold:    #f5c842;
+    --cyan:    #38bdf8;
+    --purple:  #a78bfa;
+    --red:     #f87171;
+    --green:   #4ade80;
+    --teal:    #0d9488;
+    --orange:  #fb923c;
+    --text:    #e2e8f0;
+    --muted:   #7a9bbf;
+    --code-bg: #060d1a;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    font-size: 17px;
+    line-height: 1.8;
+    padding: 0 0 80px;
+  }
+
+  /* ── Header ── */
+  .hero {
+    background: linear-gradient(160deg, var(--bg2) 0%, var(--bg3) 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 60px 40px 50px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--border);
+    color: var(--cyan);
+    font-family: 'Source Code Pro', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.8rem;
+    color: var(--gold);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 1.1rem;
+    font-weight: 300;
+    max-width: 640px;
+  }
+
+  /* ── Layout ── */
+  .content {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ── Prereq bar ── */
+  .prereq {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--teal);
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin: 40px 0 0;
+  }
+  .prereq strong { color: var(--teal); }
+
+  /* ── Sections ── */
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: var(--cyan);
+    margin: 56px 0 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: var(--purple);
+    margin: 36px 0 14px;
+  }
+  p { margin-bottom: 16px; }
+  ul, ol { margin: 12px 0 20px 28px; }
+  li { margin-bottom: 8px; }
+  a { color: var(--cyan); }
+  strong { color: var(--orange); }
+
+  /* ── Code ── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px;
+    overflow-x: auto;
+    margin: 20px 0;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  code {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 0.9em;
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    color: var(--green);
+  }
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    color: var(--text);
+  }
+  .comment { color: var(--muted); font-style: italic; }
+  .kw  { color: var(--cyan); }
+  .reg { color: var(--purple); }
+  .str { color: var(--green); }
+  .num { color: var(--orange); }
+  .lbl { color: var(--gold); }
+
+  /* ── Callout boxes ── */
+  .callout {
+    border-radius: 8px;
+    padding: 18px 22px;
+    margin: 28px 0;
+    border-left: 4px solid;
+  }
+  .callout.tip    { background: #0d1f1a; border-color: var(--green);  }
+  .callout.warn   { background: #1f1408; border-color: var(--orange); }
+  .callout.insight{ background: #120d1f; border-color: var(--purple); }
+  .callout.danger { background: #1f0d0d; border-color: var(--red);    }
+  .callout .label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .callout.tip    .label { color: var(--green);  }
+  .callout.warn   .label { color: var(--orange); }
+  .callout.insight .label{ color: var(--purple); }
+  .callout.danger .label { color: var(--red);    }
+
+  /* ── Deliverables list ── */
+  .deliverables {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+  }
+  .deliverables li::marker { color: var(--gold); }
+
+  /* ── Shell blocks ── */
+  .shell {
+    background: #010408;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 24px;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 14px;
+    margin: 16px 0;
+  }
+  .shell .prompt { color: var(--teal); user-select: none; }
+  .shell .out    { color: var(--muted); }
+
+  /* ── Exercises ── */
+  .exercise {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin: 24px 0;
+  }
+  .exercise .ex-label {
+    font-family: 'Source Code Pro', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .ex-warmup  .ex-label { color: var(--green);  }
+  .ex-core    .ex-label { color: var(--cyan);   }
+  .ex-stretch .ex-label { color: var(--orange); }
+  .exercise h4 { color: var(--text); font-size: 1rem; margin-bottom: 8px; }
+
+  /* ── Table ── */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+  th { background: var(--bg3); color: var(--cyan); text-align: left; padding: 10px 14px; border: 1px solid var(--border); font-family: 'Source Code Pro', monospace; font-size: 13px; }
+  td { padding: 10px 14px; border: 1px solid var(--border); font-size: 15px; }
+  tr:nth-child(even) td { background: var(--card); }
+
+  /* ── What's next ── */
+  .next-module {
+    background: linear-gradient(135deg, var(--bg3), var(--card));
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 30px 32px;
+    margin-top: 60px;
+  }
+  .next-module h2 { margin-top: 0; border: none; padding: 0; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">Module 01 of 21 &mdash; Foundations</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Toolchain Setup &amp; Your First Assembly Program</h1>
+  <p class="subtitle">Install NASM and GCC, understand the assemble&rarr;link&rarr;run pipeline, and write a program that the CPU executes instruction by instruction.</p>
+</div>
+
+<div class="content">
+
+  <!-- PREREQUISITES -->
+  <div class="prereq">
+    <strong>Prerequisites</strong> &mdash; This is the first module. You need a computer running Windows 10/11 (with MSYS2 installed or being installed now) or Linux x86-64. No prior assembly knowledge required.
+  </div>
+
+  <!-- WHAT YOU WILL BUILD -->
+  <h2>What You Will Build</h2>
+  <div class="deliverables">
+    <ul>
+      <li>A working NASM + GCC toolchain on your machine</li>
+      <li><code>hello.asm</code> — a 64-bit assembly source file with correct sections and a proper stack frame</li>
+      <li><code>print_helper.c</code> — a tiny C helper so we can print without touching platform syscalls yet</li>
+      <li>A <code>Makefile</code> that assembles and links on both Linux and Windows (MSYS2) with a single <code>make</code></li>
+      <li>A working binary that prints <strong>Hello, Assembly!</strong> and exits cleanly</li>
+    </ul>
+  </div>
+
+  <!-- CONCEPT: WHY ASSEMBLY -->
+  <h2>Why Learn Assembly in 2025?</h2>
+
+  <p>Every program that runs on your computer — whether written in Python, Rust, Go, or C — eventually becomes a sequence of machine instructions that the CPU fetches and executes one by one. Assembly language is the human-readable form of those machine instructions. Every high-level abstraction — functions, loops, objects, memory safety — compiles down to assembly.</p>
+
+  <p>As a security professional you regularly encounter situations where high-level source code is unavailable: reverse engineering malware, analysing crash dumps, writing exploits, auditing compiled binaries, understanding how mitigations like ASLR and NX work, or figuring out exactly what a compiler-generated binary does vs what the source code says it does. In every one of these situations, fluency in assembly is the difference between guessing and knowing.</p>
+
+  <p>This course teaches x86-64 assembly — the instruction set used by every Intel and AMD processor in desktop computers, servers, and most laptops made since 2003. When you can read and write x86-64 assembly, you can read any compiled binary produced by GCC, Clang, MSVC, or Rust's codegen backend. You can trace exactly what happens when a buffer overflows, understand why a ROP chain works, and see what an EDR hook looks like at the instruction level.</p>
+
+  <p>The goal is not to write production programs in assembly (compilers usually do a better job). The goal is to understand exactly what is happening inside the machine — because that understanding makes you a dramatically better security researcher, reverse engineer, and software developer.</p>
+
+  <!-- CONCEPT: THE PIPELINE -->
+  <h2>The Assemble → Link → Run Pipeline</h2>
+
+  <p>When you write C, a compiler translates your source into machine code in one step. With assembly, the process is separated into two explicit phases — and understanding each phase is essential.</p>
+
+  <h3>Phase 1: The Assembler (NASM)</h3>
+  <p>The assembler reads your <code>.asm</code> source file and produces an <strong>object file</strong> (<code>.o</code> or <code>.obj</code>). An object file contains binary machine code, but it is <em>not yet a runnable program</em>. It contains unresolved <strong>symbols</strong> — names like <code>puts</code> or <code>printf</code> that your code refers to but whose actual memory addresses are not yet known. The object file is a building block, not a finished product.</p>
+
+  <h3>Phase 2: The Linker (ld via gcc)</h3>
+  <p>The linker takes one or more object files and combines them into a single executable. It resolves all the unresolved symbols by finding their definitions — either in other object files you provide, or in system libraries like <code>libc.so</code>. The linker writes the final executable with all addresses filled in and the correct file format for your operating system (ELF on Linux, PE on Windows).</p>
+
+  <div class="callout insight">
+    <div class="label">Insight</div>
+    The two-phase pipeline is why you can have a program split across many <code>.asm</code> and <code>.c</code> files that all refer to each other — each file is assembled or compiled independently into an object file, then the linker connects them all. Module 16 explores this in full detail.
+  </div>
+
+  <h3>Phase 3: The Loader (the OS)</h3>
+  <p>When you run your executable, the operating system's <strong>loader</strong> reads the file, creates a new process, maps the program's code and data into virtual memory, resolves any remaining dynamic library references, and transfers control to the entry point. From that moment, the CPU is executing your instructions directly. There is no interpreter in between.</p>
+
+  <!-- CONCEPT: ANATOMY OF AN ASM FILE -->
+  <h2>Anatomy of an Assembly Source File</h2>
+
+  <p>An assembly source file is divided into <strong>sections</strong>. Each section tells the assembler (and later the linker and loader) how a region of bytes should be treated. The three sections you will use in almost every module are:</p>
+
+  <table>
+    <tr><th>Section</th><th>Purpose</th><th>Permissions at runtime</th></tr>
+    <tr><td><code>.text</code></td><td>Executable instructions — your code</td><td>Read + Execute (no write)</td></tr>
+    <tr><td><code>.data</code></td><td>Initialised global variables and string literals</td><td>Read + Write (no execute)</td></tr>
+    <tr><td><code>.bss</code></td><td>Uninitialised global variables (zeroed at load time)</td><td>Read + Write (no execute)</td></tr>
+  </table>
+
+  <p>The separation of permissions is not cosmetic — it is a security mechanism. Code lives in <code>.text</code> which is not writable; data lives in <code>.data</code>/<code>.bss</code> which is not executable. This is <strong>NX (No-Execute)</strong>, and it is enforced by the CPU's memory management unit. You will attack and defend this boundary in Module 18.</p>
+
+  <div class="callout warn">
+    <div class="label">Warning</div>
+    NASM defaults to <strong>16-bit mode</strong> for historical compatibility with old DOS programs. In 64-bit code you <em>must</em> put <code>bits 64</code> at the top of every file, or NASM will silently misassemble your 64-bit instructions and your program will crash in mysterious ways.
+  </div>
+
+  <!-- CONCEPT: STACK FRAME -->
+  <h2>The Stack Frame: Why We Push rbp</h2>
+
+  <p>Every function in x86-64 assembly follows a ritual at its start and end. You will see it thousands of times, so understand it now.</p>
+
+  <p>The CPU has a register called <code>rsp</code> (the <em>stack pointer</em>) that points to the top of the call stack — a region of memory used for temporary storage and function call bookkeeping. When you call a function, the CPU pushes the return address onto the stack and jumps to the function. When the function returns, the CPU pops that address back and jumps to it.</p>
+
+  <p>The convention is that each function also saves the <em>previous</em> frame's base pointer (<code>rbp</code>) and sets <code>rbp</code> to point to its own frame base. This creates a <strong>linked list of stack frames</strong> that debuggers like GDB use to show you a backtrace. Without this, GDB cannot walk the call stack.</p>
+
+  <pre><code><span class="comment">; Standard function prologue — appears at the start of every function</span>
+<span class="lbl">main:</span>
+    <span class="kw">push</span> <span class="reg">rbp</span>          <span class="comment">; save caller's frame pointer on the stack</span>
+    <span class="kw">mov</span>  <span class="reg">rbp</span>, <span class="reg">rsp</span>    <span class="comment">; our frame base = current top of stack</span>
+    <span class="comment">; ... function body ...</span>
+    <span class="kw">pop</span>  <span class="reg">rbp</span>          <span class="comment">; restore caller's frame pointer</span>
+    <span class="kw">ret</span>               <span class="comment">; pop return address into rip and jump to it</span></code></pre>
+
+  <!-- CODE WALKTHROUGH -->
+  <h2>Code Walkthrough: hello.asm</h2>
+
+  <pre><code><span class="comment">; hello.asm — every line explained</span>
+
+<span class="kw">bits</span> <span class="num">64</span>             <span class="comment">; REQUIRED: tell NASM we are generating 64-bit instructions</span>
+
+<span class="kw">extern</span> <span class="lbl">print_hello</span> <span class="comment">; declare that this symbol is defined somewhere else (print_helper.c)</span>
+                    <span class="comment">; the linker will resolve it — NASM just needs to know it exists</span>
+
+<span class="kw">section</span> .text       <span class="comment">; everything below goes into the executable code section</span>
+    <span class="kw">global</span> <span class="lbl">main</span>     <span class="comment">; export 'main' so the linker (and C runtime) can find our entry point</span>
+
+<span class="lbl">main:</span>               <span class="comment">; label — this address becomes the value of the symbol 'main'</span>
+    <span class="kw">push</span> <span class="reg">rbp</span>        <span class="comment">; stack frame prologue: save the previous base pointer</span>
+    <span class="kw">mov</span>  <span class="reg">rbp</span>, <span class="reg">rsp</span>  <span class="comment">; rbp now points to our frame base</span>
+
+    <span class="kw">call</span> <span class="lbl">print_hello</span> <span class="comment">; push rip+5 onto stack, then jump to print_hello's address</span>
+                    <span class="comment">; the C runtime will handle argument setup, puts() call, etc.</span>
+
+    <span class="kw">xor</span>  <span class="reg">eax</span>, <span class="reg">eax</span>  <span class="comment">; return value = 0. Writing to eax zeros the upper 32 bits of rax too.</span>
+                    <span class="comment">; xor reg,reg is the canonical way to zero a register (1 byte shorter than mov)</span>
+    <span class="kw">pop</span>  <span class="reg">rbp</span>        <span class="comment">; restore caller's frame pointer</span>
+    <span class="kw">ret</span>             <span class="comment">; pop saved return address into rip → jumps back to C runtime</span>
+                    <span class="comment">; the C runtime then calls exit() with our return value (0)</span></code></pre>
+
+  <h2>Code Walkthrough: print_helper.c</h2>
+
+  <pre><code><span class="comment">/* print_helper.c
+ * A C bridge so hello.asm can print without knowing the platform ABI yet.
+ * The ABI teaches us how to pass arguments in registers — that's Module 09.
+ */</span>
+#include &lt;stdio.h&gt;
+
+void print_hello(void)       <span class="comment">/* 'void' params = no arguments accepted */</span>
+{
+    puts("Hello, Assembly!"); <span class="comment">/* puts() writes the string + newline to stdout */</span>
+}</code></pre>
+
+  <!-- INSTALL -->
+  <h2>Toolchain Installation</h2>
+
+  <h3>Windows (MSYS2 — Recommended)</h3>
+  <p>MSYS2 gives you a Linux-like shell with a proper package manager (<code>pacman</code>) on Windows. It is the easiest way to get a working NASM + GCC + GDB environment.</p>
+
+  <ol>
+    <li>Download and run the MSYS2 installer from <strong>msys2.org</strong></li>
+    <li>Open the <strong>MSYS2 UCRT64</strong> terminal (not MSYS, not MINGW32)</li>
+    <li>Update the package database:
+      <div class="shell"><span class="prompt">$ </span>pacman -Syu</div>
+    </li>
+    <li>Install the toolchain:
+      <div class="shell"><span class="prompt">$ </span>pacman -S mingw-w64-ucrt-x86_64-nasm mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb make</div>
+    </li>
+    <li>Verify:
+      <div class="shell">
+        <span class="prompt">$ </span>nasm --version<br/>
+        <span class="out">NASM version 2.16.x</span><br/>
+        <span class="prompt">$ </span>gcc --version<br/>
+        <span class="out">gcc (Rev1, Built by MSYS2) 13.x.x</span>
+      </div>
+    </li>
+  </ol>
+
+  <div class="callout tip">
+    <div class="label">Tip</div>
+    Always use the <strong>UCRT64</strong> environment (not MINGW64, not MSYS). UCRT64 uses the Universal C Runtime which is the modern Windows standard. The package prefix is <code>mingw-w64-ucrt-x86_64-</code>.
+  </div>
+
+  <h3>Linux (Ubuntu / Debian)</h3>
+  <div class="shell">
+    <span class="prompt">$ </span>sudo apt update &amp;&amp; sudo apt install nasm gcc gdb make
+  </div>
+
+  <h3>Linux (Fedora / RHEL)</h3>
+  <div class="shell">
+    <span class="prompt">$ </span>sudo dnf install nasm gcc gdb make
+  </div>
+
+  <!-- BUILD AND RUN -->
+  <h2>Build &amp; Run Instructions</h2>
+
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_01<br/>
+    <span class="prompt">$ </span>make<br/>
+    <span class="out">nasm -f elf64 -o hello.o hello.asm</span><br/>
+    <span class="out">gcc -Wall -Wextra -std=c11 -g -c -o print_helper.o print_helper.c</span><br/>
+    <span class="out">gcc -Wall -Wextra -std=c11 -g -no-pie -o hello hello.o print_helper.o</span><br/>
+    <span class="prompt">$ </span>./hello<br/>
+    <span class="out">Hello, Assembly!</span><br/>
+    <span class="prompt">$ </span>echo $?<br/>
+    <span class="out">0</span>
+  </div>
+
+  <p>On Windows (MSYS2) the output and commands are identical, except the binary is named <code>hello.exe</code> and the format flag becomes <code>win64</code>.</p>
+
+  <h3>Inspecting the Object File</h3>
+  <p>Before linking, look at what the assembler produced:</p>
+  <div class="shell">
+    <span class="prompt">$ </span>objdump -d -M intel hello.o
+  </div>
+  <p>You will see the raw machine code bytes next to the disassembled instructions. The <code>call</code> instruction will show an address of <code>0x0</code> — that is the unresolved symbol. After linking, run <code>objdump -d -M intel hello</code> and the address will be filled in.</p>
+
+  <div class="callout insight">
+    <div class="label">Insight — Security Relevance</div>
+    The gap between the object file (unresolved symbols) and the linked binary (addresses filled in) is where relocation happens. This is also how <strong>PLT/GOT hooking</strong> works — malware and EDRs alike can intercept function calls by patching the GOT entries that the linker fills in. Module 16 shows this in detail.
+  </div>
+
+  <h3>Running Under GDB</h3>
+  <div class="shell">
+    <span class="prompt">$ </span>gdb ./hello<br/>
+    <span class="out">(gdb) </span>break main<br/>
+    <span class="out">(gdb) </span>run<br/>
+    <span class="out">(gdb) </span>layout asm<br/>
+    <span class="out">(gdb) </span>layout regs<br/>
+    <span class="out">(gdb) </span>stepi<br/>
+    <span class="out">(gdb) </span>stepi
+  </div>
+  <p><code>layout asm</code> shows the disassembled instructions. <code>layout regs</code> shows all registers. <code>stepi</code> executes exactly one instruction at a time. Watch <code>rsp</code> decrease by 8 when <code>push rbp</code> executes, and watch <code>rbp</code> change when <code>mov rbp, rsp</code> executes. This is assembly at the finest granularity.</p>
+
+  <!-- EXERCISES -->
+  <h2>Exercises</h2>
+
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Confirm the pipeline</h4>
+    <p>Run <code>make</code> and then <code>make clean</code>. Then manually run each step of the pipeline yourself:</p>
+    <ol>
+      <li><code>nasm -f elf64 -o hello.o hello.asm</code> (or <code>win64</code> on Windows)</li>
+      <li><code>gcc -Wall -Wextra -std=c11 -g -c -o print_helper.o print_helper.c</code></li>
+      <li><code>gcc -no-pie -o hello hello.o print_helper.o</code></li>
+      <li><code>./hello</code></li>
+    </ol>
+    <p>Understand what each command produces. Run <code>file hello.o</code> and <code>file hello</code> and compare the descriptions.</p>
+  </div>
+
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Modify the message</h4>
+    <p>Change <code>print_helper.c</code> to print your name instead of "Hello, Assembly!". Rebuild and verify. Then add a <em>second</em> call to a new function <code>print_goodbye()</code> in <code>hello.asm</code>: declare it with <code>extern print_goodbye</code>, define it in <code>print_helper.c</code>, and call it after <code>print_hello</code>. Make sure the stack frame is still correct (rbp saved and restored, return value 0).</p>
+  </div>
+
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. Trace in GDB</h4>
+    <p>Open the binary in GDB with <code>gdb ./hello</code>. Set a breakpoint at <code>main</code>: <code>break main</code>. Run it. Enable both layouts: <code>layout asm</code>, then <code>layout regs</code>. Step through every instruction with <code>stepi</code>. For each instruction, note what register or memory location changed and by how much. Pay particular attention to <code>rsp</code> during <code>push</code>/<code>pop</code>/<code>call</code>/<code>ret</code>.</p>
+  </div>
+
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. Return a non-zero exit code</h4>
+    <p>Change the <code>xor eax, eax</code> to <code>mov eax, 42</code>. Rebuild and run <code>./hello; echo $?</code>. Confirm you see <code>42</code>. Now explain: why does writing to <code>eax</code> set the return value when the C runtime reads <code>rax</code>? (Hint: look up what happens to the upper 32 bits of <code>rax</code> when you write to <code>eax</code> — this is covered fully in Module 02.)</p>
+  </div>
+
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>5. Read the object file</h4>
+    <p>Run <code>objdump -d -M intel hello.o</code> and then <code>objdump -d -M intel hello</code>. Find the <code>call</code> instruction in both outputs. In the object file, what address does it call? In the linked binary, what address does it call? Run <code>nm hello</code> and find the address of <code>print_hello</code>. Do the numbers match? This is the linker's symbol resolution in action.</p>
+  </div>
+
+  <!-- WHAT'S NEXT -->
+  <div class="next-module">
+    <h2><a href="../module_02/tutorial.html" style="color:inherit;">What's Next — Module 02: Registers</a></h2>
+    <p>In Module 02 we open up the register file completely: all 16 general-purpose registers, every sub-register alias (<code>eax</code>/<code>ax</code>/<code>al</code>/<code>ah</code>), the instruction pointer <code>rip</code>, the flags register <code>rflags</code> with every named bit explained, and the segment registers (<code>fs</code>/<code>gs</code>) that Windows uses for the Thread Environment Block — a structure every security researcher needs to know. The new file will be <code>registers.asm</code>, which uses a C helper to print register values live so you can observe the zero-extension effect of writing to 32-bit sub-registers.</p>
+  </div>
+
+</div><!-- /content -->
+</body>
+</html>

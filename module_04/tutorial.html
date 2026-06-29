@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 04 — Arithmetic & the ALU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}a{color:var(--cyan);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 04 of 21 &mdash; Core Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Arithmetic &amp; the ALU</h1>
+  <p class="subtitle">add, sub, mul, div, imul, idiv, adc, sbb — and exactly which flag each instruction sets, and when a result silently wraps.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Modules 01–03: registers memorised, data directives understood, two's complement fluent.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>arith.asm</code> — demonstrates every arithmetic instruction including a 64×64→128-bit unsigned multiply and a 128-bit addition using <code>adc</code></li>
+    <li>Precise understanding of CF vs OF and when each is set</li>
+    <li>The correct setup for <code>div</code> and <code>idiv</code> (a very common source of bugs)</li>
+  </ul></div>
+
+  <h2>The ALU Has No Concept of "Type"</h2>
+  <p>The ALU is a pure bit-manipulation engine. When you execute <code>add rax, rbx</code>, the CPU adds 64 bits to 64 bits and writes 64 bits back. It has no idea whether those bits represent a signed integer, an unsigned integer, a pointer, or a packed byte array. <em>You</em> choose the interpretation. The only feedback the CPU gives you is the flags register — a set of status bits that record properties of the result (was it zero? did it produce a carry? did it overflow a signed range?).</p>
+  <p>This is why the same <code>add</code> instruction serves both signed and unsigned addition. The bits are the same; the interpretation differs. The flags let you detect problems regardless of interpretation.</p>
+
+  <h2>add, sub, inc, dec, neg</h2>
+  <pre><code><span class="kw">add</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>       <span class="comment">; rax = rax + rbx  (sets CF,ZF,SF,OF,PF)</span>
+<span class="kw">add</span>  <span class="reg">rax</span>, <span class="num">42</span>        <span class="comment">; rax = rax + 42   (immediate operand)</span>
+<span class="kw">sub</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>       <span class="comment">; rax = rax - rbx  (CF set if borrow needed)</span>
+<span class="kw">inc</span>  <span class="reg">rax</span>            <span class="comment">; rax++  — does NOT affect CF (unlike add rax,1)</span>
+<span class="kw">dec</span>  <span class="reg">rax</span>            <span class="comment">; rax--  — does NOT affect CF</span>
+<span class="kw">neg</span>  <span class="reg">rax</span>            <span class="comment">; rax = 0 - rax  (two's complement negation)</span></code></pre>
+
+  <div class="callout warn">
+    <div class="label">Gotcha — inc does not affect CF</div>
+    <code>inc rax</code> does not set the Carry Flag even if <code>rax</code> wraps from <code>0xFFFFFFFFFFFFFFFF</code> to <code>0</code>. This is intentional (it allows <code>inc</code> inside a loop without disturbing a carry from a previous <code>add</code>), but it surprises many programmers. If you need CF after incrementing, use <code>add rax, 1</code> instead.
+  </div>
+
+  <h2>mul and imul — Multiplication</h2>
+  <p>x86-64 has two multiply instructions: <code>mul</code> (unsigned) and <code>imul</code> (signed). They differ in how they handle the sign of the result and which flags they set.</p>
+
+  <h3>One-operand mul (unsigned, full 128-bit result)</h3>
+  <pre><code><span class="comment">; mul src  multiplies rax by src</span>
+<span class="comment">; Result goes into rdx:rax  (upper 64 bits in rdx, lower 64 in rax)</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0xFFFFFFFFFFFFFFFF</span>  <span class="comment">; 18446744073709551615</span>
+<span class="kw">mov</span>  <span class="reg">rbx</span>, <span class="num">2</span>
+<span class="kw">mul</span>  <span class="reg">rbx</span>                      <span class="comment">; rdx:rax = 0x0000000000000001_FFFFFFFFFFFFFFFE</span>
+<span class="comment">; rdx = 1  (high half)
+; rax = 0xFFFFFFFFFFFFFFFE  (low half)</span></code></pre>
+
+  <h3>Two-operand and three-operand imul (signed, truncated)</h3>
+  <pre><code><span class="kw">imul</span> <span class="reg">rax</span>, <span class="reg">rbx</span>          <span class="comment">; rax = rax * rbx  (result truncated to 64 bits)</span>
+<span class="kw">imul</span> <span class="reg">rax</span>, <span class="reg">rbx</span>, <span class="num">6</span>       <span class="comment">; rax = rbx * 6    (three-operand: compiler favourite)</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Why compilers love three-operand imul</div>
+    The three-operand form <code>imul dst, src, imm</code> is non-destructive — it computes <code>src × imm</code> without modifying <code>src</code>. This makes register allocation much simpler for the compiler. You will see it constantly in disassembly, often used for index calculations like <code>imul rax, rcx, 24</code> to multiply an index by the size of a struct.
+  </div>
+
+  <h2>div and idiv — Division</h2>
+  <p>Division is the most dangerous arithmetic instruction to get wrong. Before calling <code>div</code> or <code>idiv</code>, you <strong>must</strong> set up both <code>rdx</code> and <code>rax</code> as a pair — together they form the 128-bit dividend.</p>
+
+  <table>
+    <tr><th>Instruction</th><th>Setup</th><th>Quotient</th><th>Remainder</th></tr>
+    <tr><td><code>div rbx</code></td><td><code>xor rdx,rdx</code> (zero the high half)</td><td><code>rax</code></td><td><code>rdx</code></td></tr>
+    <tr><td><code>idiv rbx</code></td><td><code>cqo</code> (sign-extend rax into rdx)</td><td><code>rax</code></td><td><code>rdx</code></td></tr>
+  </table>
+
+  <pre><code><span class="comment">; Unsigned division: 100 / 7 = 14 remainder 2</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">100</span>
+<span class="kw">xor</span>  <span class="reg">rdx</span>, <span class="reg">rdx</span>    <span class="comment">; REQUIRED: clear the upper half of the dividend</span>
+<span class="kw">mov</span>  <span class="reg">rbx</span>, <span class="num">7</span>
+<span class="kw">div</span>  <span class="reg">rbx</span>         <span class="comment">; rax=14, rdx=2</span>
+
+<span class="comment">; Signed division: -100 / 7 = -14 remainder -2</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">-100</span>
+<span class="kw">cqo</span>              <span class="comment">; sign-extend: if rax<0, rdx=0xFFFFFFFFFFFFFFFF</span>
+<span class="kw">mov</span>  <span class="reg">rbx</span>, <span class="num">7</span>
+<span class="kw">idiv</span> <span class="reg">rbx</span>         <span class="comment">; rax=-14, rdx=-2</span></code></pre>
+
+  <div class="callout danger">
+    <div class="label">Division by Zero = #DE Exception</div>
+    If the divisor is zero, or if the quotient doesn't fit in <code>rax</code> (e.g., dividing a large 128-bit number where the quotient exceeds 64 bits), the CPU raises a Divide Error exception (#DE). The OS delivers this as SIGFPE on Linux or as an exception on Windows. Your program terminates. There is no flag for this — you must validate before dividing.
+  </div>
+
+  <h2>adc and sbb — Multi-Precision Arithmetic</h2>
+  <p><code>adc</code> (Add with Carry) and <code>sbb</code> (Subtract with Borrow) let you chain arithmetic operations across multiple registers to work with numbers wider than 64 bits.</p>
+  <pre><code><span class="comment">; 128-bit addition: (rdx:rax) += (rcx:rbx)</span>
+<span class="kw">add</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>    <span class="comment">; add low halves; CF=1 if carry out</span>
+<span class="kw">adc</span>  <span class="reg">rdx</span>, <span class="reg">rcx</span>    <span class="comment">; add high halves PLUS the carry from the low half</span>
+<span class="comment">; adc is: rdx = rdx + rcx + CF</span></code></pre>
+
+  <h2>CF vs OF — Two Different Kinds of Overflow</h2>
+  <table>
+    <tr><th>Flag</th><th>Meaning</th><th>Relevant interpretation</th><th>Example</th></tr>
+    <tr><td>CF</td><td>Carry / Borrow</td><td>Unsigned overflow</td><td><code>0xFFFF...FFFF + 1 → 0</code>, CF=1</td></tr>
+    <tr><td>OF</td><td>Signed Overflow</td><td>Signed overflow</td><td><code>0x7FFF...FFFF + 1 → negative</code>, OF=1</td></tr>
+  </table>
+  <p>The CPU sets both flags after every arithmetic instruction. You choose which one to check based on whether you care about unsigned or signed semantics. Module 06 shows the conditional jump mnemonics that test each flag.</p>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_04 &amp;&amp; make &amp;&amp; ./arith<br/>
+    <span class="out">=== add / sub / inc / dec ===<br/>
+  u64:                  142  (0x000000000000008E)<br/>
+  u64:                  143  (0x000000000000008F)<br/>
+  u64:                    1  (0x0000000000000001)<br/>
+  s64:                  -42<br/>
+=== mul: unsigned 64x64 -> 128-bit result in rdx:rax ===<br/>
+  u64:                    1  (0x0000000000000001)<br/>
+  u64: 18446744073709551614  (0xFFFFFFFFFFFFFFFE)<br/>
+=== imul: signed multiply ===<br/>
+  s64:                  -21<br/>
+  s64:                   42<br/>
+=== div/idiv ===<br/>
+  u64:                   14  (0x000000000000000E)<br/>
+  u64:                    2  (0x0000000000000002)<br/>
+  s64:                  -14<br/>
+  s64:                   -2</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Verify the 128-bit multiply</h4>
+    <p>Multiply <code>0xFFFFFFFFFFFFFFFF × 0xFFFFFFFFFFFFFFFF</code> using <code>mul</code>. The exact result is <code>0xFFFFFFFFFFFFFFFE_0000000000000001</code>. Print both <code>rdx</code> (high) and <code>rax</code> (low) and verify this.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Integer division with remainders</h4>
+    <p>Compute these in assembly and print quotient and remainder for each: (a) 255 / 16, (b) 1000 / 7, (c) -99 / 10 (signed). Verify the signed case: in C, <code>-99 / 10 = -9</code> with remainder <code>-9</code>. Does your asm match?</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. Trigger CF and OF separately</h4>
+    <p>Write two sequences: one that sets CF=1 but OF=0, and one that sets OF=1 but CF=0. After each <code>add</code>, use <code>pushfq</code> + <code>pop rax</code> to capture <code>rflags</code>. Check bit 0 (CF) and bit 11 (OF) of the value to confirm which flag was set.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. 256-bit addition</h4>
+    <p>Extend the multi-precision demo to add two 256-bit numbers stored across four 64-bit registers each. Use <code>add</code> for the lowest pair and <code>adc</code> for the remaining three pairs.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_05/tutorial.html" style="color:inherit;">What's Next — Module 05: Bitwise Operations &amp; Bit Manipulation</a></h2>
+    <p>Module 05 covers the bit-level instruction set: <code>and</code>, <code>or</code>, <code>xor</code>, <code>not</code>, all shift and rotate variants, and the BMI (Bit Manipulation Instructions) like <code>popcnt</code>, <code>bsf</code>/<code>bsr</code>, <code>tzcnt</code>/<code>lzcnt</code>. The new file is <code>bits.asm</code>, which demonstrates practical security patterns: extracting nibbles from bytes, testing and toggling individual flag bits, and fast power-of-two division using right shifts.</p>
+  </div>
+</div>
+</body>
+</html>

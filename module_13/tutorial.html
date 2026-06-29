@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 13 — SIMD: SSE, AVX & Packed Data</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .lane-grid{display:grid;gap:4px;margin:16px 0;}
+  .lane-row{display:flex;gap:4px;}
+  .lane-cell{flex:1;background:var(--bg3);border:1px solid var(--border);padding:8px;text-align:center;font-family:'Source Code Pro',monospace;font-size:13px;border-radius:4px;}
+  .lane-label{color:var(--muted);font-size:11px;text-align:center;margin-bottom:4px;font-family:'Source Code Pro',monospace;}
+  .lane-a .lane-cell{border-color:var(--cyan);color:var(--cyan);}
+  .lane-b .lane-cell{border-color:var(--purple);color:var(--purple);}
+  .lane-r .lane-cell{border-color:var(--green);color:var(--green);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 13 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>SIMD: SSE, AVX &amp; Packed Data</h1>
+  <p class="subtitle">One instruction, multiple data. SSE2 operates on 2 doubles or 4 floats simultaneously. AVX doubles that to 4 doubles or 8 floats in 256-bit registers. You will understand lane layout, alignment rules, horizontal reduction, and the <code>vzeroupper</code> performance hazard.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 12 (scalar SSE2, xmm registers, float ABI).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>simd.asm</code> — SSE2 packed double/float/integer, SSE4.1 blend, AVX 256-bit arithmetic, and a 4-wide vectorized dot product with horizontal reduction</li>
+  </ul></div>
+
+  <h2>From Scalar to SIMD</h2>
+  <p>Scalar instructions process one value. Packed (SIMD) instructions process multiple values in <strong>lanes</strong> in parallel. The xmm register holds 128 bits; the ymm register (AVX) holds 256 bits.</p>
+
+  <div class="lane-label">xmm0 (128 bits) as two packed doubles:</div>
+  <div class="lane-row lane-a">
+    <div class="lane-cell">Lane 1 (bits 127–64)<br/>2.0</div>
+    <div class="lane-cell">Lane 0 (bits 63–0)<br/>1.0</div>
+  </div>
+  <div style="margin:8px 0;text-align:center;font-family:'Source Code Pro',monospace;color:var(--muted);">addpd xmm0, xmm1</div>
+  <div class="lane-row lane-b">
+    <div class="lane-cell">4.0</div>
+    <div class="lane-cell">3.0</div>
+  </div>
+  <div style="margin:8px 0;text-align:center;font-family:'Source Code Pro',monospace;color:var(--muted);">= result</div>
+  <div class="lane-row lane-r">
+    <div class="lane-cell">6.0</div>
+    <div class="lane-cell">4.0</div>
+  </div>
+
+  <h2>Instruction Naming Convention</h2>
+  <table>
+    <tr><th>Suffix</th><th>Element type</th><th>Elements per xmm</th><th>Elements per ymm</th></tr>
+    <tr><td><code>pd</code></td><td>Packed double (f64)</td><td>2</td><td>4</td></tr>
+    <tr><td><code>ps</code></td><td>Packed single (f32)</td><td>4</td><td>8</td></tr>
+    <tr><td><code>sd</code></td><td>Scalar double (f64)</td><td>1 (low lane)</td><td>—</td></tr>
+    <tr><td><code>ss</code></td><td>Scalar single (f32)</td><td>1 (low lane)</td><td>—</td></tr>
+    <tr><td>none (integer)</td><td>Packed int (various widths)</td><td>8–16 bytes</td><td>16–32 bytes</td></tr>
+  </table>
+  <p>The <strong>V</strong> prefix (VEX encoding) denotes AVX: <code>vmulpd</code>, <code>vaddps</code>. AVX instructions have a 3-operand non-destructive form: <code>vmulpd ymm0, ymm1, ymm2</code> means <code>ymm0 = ymm1 * ymm2</code>.</p>
+
+  <h2>Alignment Requirements</h2>
+  <table>
+    <tr><th>Instruction family</th><th>Required alignment</th><th>NASM directive</th></tr>
+    <tr><td>SSE2 aligned (movapd, movaps, movdqa)</td><td>16-byte</td><td><code>align 16</code></td></tr>
+    <tr><td>AVX aligned (vmovapd, vmovaps)</td><td>32-byte</td><td><code>align 32</code></td></tr>
+    <tr><td>SSE2 unaligned (movupd, movups)</td><td>Any</td><td>—</td></tr>
+    <tr><td>AVX unaligned (vmovupd)</td><td>Any</td><td>—</td></tr>
+  </table>
+  <div class="callout warn">
+    <div class="label">Alignment Faults</div>
+    Using <code>movapd</code> on an unaligned address raises a #GP fault (segfault on Linux). This is actually useful during development — it catches alignment bugs immediately. Always use <code>align 16</code> or <code>align 32</code> before SIMD data in <code>.rodata</code>/<code>.data</code>, and ensure <code>rsp</code> is aligned to 16 bytes before <code>call</code> (guaranteed by the ABI) or 32 bytes if you are allocating AVX data on the stack.
+  </div>
+
+  <h2>SSE2 Packed Double Arithmetic</h2>
+  <pre><code><span class="comment">; addpd — add two pairs of doubles in parallel</span>
+    <span class="kw">movapd</span> <span class="reg">xmm0</span>, [<span class="kw">rel</span> <span class="lbl">pd_a</span>]   <span class="comment">; xmm0 = [2.0 | 1.0]</span>
+    <span class="kw">movapd</span> <span class="reg">xmm1</span>, [<span class="kw">rel</span> <span class="lbl">pd_b</span>]   <span class="comment">; xmm1 = [4.0 | 3.0]</span>
+    <span class="kw">addpd</span>  <span class="reg">xmm0</span>, <span class="reg">xmm1</span>          <span class="comment">; xmm0 = [6.0 | 4.0]</span>
+
+<span class="comment">; Extract individual lanes</span>
+    <span class="kw">movsd</span>  <span class="reg">xmm2</span>, <span class="reg">xmm0</span>           <span class="comment">; xmm2 = lane0 = 4.0</span>
+    <span class="kw">psrldq</span> <span class="reg">xmm0</span>, <span class="num">8</span>              <span class="comment">; shift right 8 bytes → lane1 now in lane0</span>
+                                 <span class="comment">; xmm0 = 6.0</span></code></pre>
+
+  <h2>AVX 256-bit: Four Doubles at Once</h2>
+  <pre><code><span class="comment">; vmovapd / vaddpd / vmulpd operate on 4 doubles simultaneously</span>
+    <span class="kw">vmovapd</span> <span class="reg">ymm0</span>, [<span class="kw">rel</span> <span class="lbl">avx_a</span>]  <span class="comment">; ymm0 = [4.0|3.0|2.0|1.0]</span>
+    <span class="kw">vmovapd</span> <span class="reg">ymm1</span>, [<span class="kw">rel</span> <span class="lbl">avx_b</span>]  <span class="comment">; ymm1 = [8.0|7.0|6.0|5.0]</span>
+    <span class="kw">vaddpd</span>  <span class="reg">ymm0</span>, <span class="reg">ymm0</span>, <span class="reg">ymm1</span>   <span class="comment">; ymm0 = [12|10|8|6] (4 adds, 1 instruction)</span>
+
+    <span class="comment">; Store all four results to memory to inspect</span>
+    <span class="kw">vmovapd</span> [<span class="kw">rel</span> <span class="lbl">tmp</span>], <span class="reg">ymm0</span>
+
+    <span class="kw">vzeroupper</span>                  <span class="comment">; REQUIRED before mixing with SSE code</span></code></pre>
+
+  <div class="callout danger">
+    <div class="label">vzeroupper — Never Forget It</div>
+    On pre-Skylake Intel CPUs, calling SSE code after executing <code>ymm</code> instructions without <code>vzeroupper</code> triggers the "AVX-SSE transition penalty" — up to 100 stall cycles per call because the CPU must merge the upper and lower halves. Always insert <code>vzeroupper</code> before any function call after using <code>ymm</code> registers. The compiler emits it automatically; hand-written assembly must do it manually.
+  </div>
+
+  <h2>Integer SIMD: 8×16-bit Addition</h2>
+  <pre><code><span class="comment">; paddw: packed add word (16-bit signed integers, 8 per xmm)</span>
+    <span class="kw">movdqa</span> <span class="reg">xmm0</span>, [<span class="kw">rel</span> <span class="lbl">sw_a</span>]   <span class="comment">; [8,7,6,5,4,3,2,1] as 16-bit words</span>
+    <span class="kw">movdqa</span> <span class="reg">xmm1</span>, [<span class="kw">rel</span> <span class="lbl">sw_b</span>]   <span class="comment">; [80,70,60,50,40,30,20,10]</span>
+    <span class="kw">paddw</span>  <span class="reg">xmm0</span>, <span class="reg">xmm1</span>          <span class="comment">; [88,77,66,55,44,33,22,11]</span>
+
+<span class="comment">; pmullw: packed multiply low word (returns low 16 bits of each 32-bit product)</span>
+    <span class="kw">pmullw</span> <span class="reg">xmm0</span>, <span class="reg">xmm1</span></code></pre>
+
+  <h2>4-Wide Dot Product with Horizontal Reduction</h2>
+  <p>Computing <code>a·b = a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3]</code> using AVX:</p>
+  <pre><code>    <span class="kw">vmovapd</span> <span class="reg">ymm0</span>, [<span class="kw">rel</span> <span class="lbl">dot4_a</span>] <span class="comment">; [4|3|2|1]</span>
+    <span class="kw">vmovapd</span> <span class="reg">ymm1</span>, [<span class="kw">rel</span> <span class="lbl">dot4_b</span>] <span class="comment">; [8|7|6|5]</span>
+    <span class="kw">vmulpd</span>  <span class="reg">ymm0</span>, <span class="reg">ymm0</span>, <span class="reg">ymm1</span>   <span class="comment">; [32|21|12|5]  — 4 multiplies</span>
+
+    <span class="comment">; Reduce 4 lanes to 1 scalar sum:</span>
+    <span class="comment">; Step 1: fold upper half down</span>
+    <span class="kw">vextractf128</span> <span class="reg">xmm1</span>, <span class="reg">ymm0</span>, <span class="num">1</span>  <span class="comment">; xmm1 = [32|21]  (upper 128 bits)</span>
+                                   <span class="comment">; xmm0 still = [12|5]  (lower 128 bits)</span>
+    <span class="kw">addpd</span>   <span class="reg">xmm0</span>, <span class="reg">xmm1</span>           <span class="comment">; xmm0 = [32+12 | 21+5] = [44|26]</span>
+
+    <span class="comment">; Step 2: horizontal sum the two remaining lanes</span>
+    <span class="kw">haddpd</span>  <span class="reg">xmm0</span>, <span class="reg">xmm0</span>           <span class="comment">; xmm0[0] = 44 + 26 = 70.0</span>
+    <span class="kw">vzeroupper</span></code></pre>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_13 &amp;&amp; make &amp;&amp; ./simd<br/>
+    <span class="out">=== SSE2 packed double: addpd / mulpd (2x f64) ===<br/>
+  fval: 4.000000<br/>
+  fval: 6.000000<br/>
+  fval: 3.000000<br/>
+  fval: 8.000000<br/>
+=== SSE2 packed float:  addps / mulps (4x f32) ===<br/>
+  fval: 6.000000<br/>
+  fval: 8.000000<br/>
+=== AVX  packed double: vaddpd 256-bit (4x f64) ===<br/>
+  fval: 6.000000<br/>
+  fval: 8.000000<br/>
+  fval: 10.000000<br/>
+  fval: 12.000000<br/>
+=== SSE2 integer SIMD: paddw / pmullw (8x i16) ===<br/>
+  val:  11                   0xB<br/>
+  val:  10                   0xA<br/>
+=== SSE4.1 blendpd: select lanes from two regs ===<br/>
+  fval: 1.000000<br/>
+  fval: 4.000000<br/>
+=== Packed dot product: 4 doubles in one pass ===<br/>
+  fval: 70.000000<br/>
+=== Horizontal add: haddpd reduces xmm to scalar ===<br/>
+  fval: 3.000000</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Vectorized absolute value</h4>
+    <p>The sign bit of a double is bit 63. Store the mask <code>0x7FFFFFFFFFFFFFFF</code> in both lanes of an xmm register using <code>pcmpeqw xmm2, xmm2; psrlq xmm2, 1</code> (set all bits then clear the sign bit). Then use <code>andpd xmm0, xmm2</code> to clear the sign bit of both lanes simultaneously, computing absolute value for 2 doubles in one instruction.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. 8-wide integer SIMD: saturating add</h4>
+    <p>Use <code>paddsw</code> (packed add signed word, saturating) instead of <code>paddw</code>. Load two 8-element arrays of <code>int16_t</code> where some pairs overflow int16 (e.g., 30000 + 30000 = 60000, which overflows). Verify that <code>paddsw</code> saturates at 32767 while <code>paddw</code> wraps around. This saturating behavior is important in image processing and audio mixing to avoid wrap-around artifacts.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Vectorized strlen using SSE2</h4>
+    <p>Load 16 bytes at a time from a string using <code>movdqu xmm0, [rdi]</code>. Use <code>pcmpeqb xmm0, xmm1</code> (where <code>xmm1</code> is all zeros) to compare each byte to null, producing a mask. Use <code>pmovmskb eax, xmm0</code> to extract the comparison mask into an integer register, then <code>bsf eax, eax</code> to find the first set bit. This is the technique used by glibc's optimized strlen on x86-64. Handle alignment at the start and remainder at the end manually.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_14/tutorial.html" style="color:inherit;">What's Next — Module 14: ELF &amp; PE Binary Formats</a></h2>
+    <p>Module 14 steps back from instruction-level work to examine the containers that hold machine code. You will read ELF (Linux) and PE (Windows) binary headers in C, walking the section header table, symbol table, and program header table by hand — the same way a linker, loader, or disassembler does it. Understanding these structures is the foundation for exploit development, binary patching, and writing your own loader or disassembler.</p>
+  </div>
+</div>
+</body>
+</html>

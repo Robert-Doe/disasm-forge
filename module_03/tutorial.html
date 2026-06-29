@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 03 — Data Representation & Memory Fundamentals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  a{color:var(--cyan);}strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+  .byte-grid{display:flex;gap:4px;margin:16px 0;font-family:'Source Code Pro',monospace;font-size:13px;}
+  .byte-box{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:8px 10px;text-align:center;min-width:44px;}
+  .byte-box .addr{color:var(--muted);font-size:10px;margin-bottom:4px;}
+  .byte-box .val{color:var(--orange);}
+  .byte-box .note{color:var(--teal);font-size:10px;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">Module 03 of 21 &mdash; Foundations</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Data Representation &amp; Memory Fundamentals</h1>
+  <p class="subtitle">How values are stored in memory, why bytes appear reversed, how negative numbers work, and how the four memory sections differ — with live hex dumps proving every claim.</p>
+</div>
+
+<div class="content">
+
+  <div class="prereq">
+    <strong>Prerequisites</strong> &mdash; Modules 01 &amp; 02 complete: toolchain working, registers understood, zero-extension rule memorised.
+  </div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables">
+    <ul>
+      <li><code>data.asm</code> — defines values using every data directive (<code>db</code>/<code>dw</code>/<code>dd</code>/<code>dq</code>) in all four sections, then hex-dumps them live</li>
+      <li><code>data_demo.c</code> — C helpers that print raw memory as hex bytes</li>
+      <li>Fluency with little-endian byte order, two's complement, IEEE 754 bit layout, and section permissions</li>
+    </ul>
+  </div>
+
+  <h2>Why Data Representation Matters for Security</h2>
+
+  <p>Every vulnerability class you will ever encounter ultimately comes down to a mismatch between how a programmer <em>thinks</em> a value is represented and how the CPU <em>actually</em> stores it. Integer overflow bugs happen because the programmer forgot that a 32-bit unsigned value wraps at 4,294,967,295. Type confusion bugs happen because the programmer read a float's bit pattern as an integer or vice versa. Buffer overflows happen because the programmer misunderstood the byte layout of a struct. Sign confusion bugs — where a signed comparison produces unexpected results — happen because two's complement negatives look like large positive numbers when treated as unsigned.</p>
+
+  <p>This module removes all ambiguity. You will define values in memory, dump them as raw bytes, and observe exactly how the CPU lays them out. No abstractions. No assumptions. Just bytes.</p>
+
+  <h2>Memory Sections and Their Permissions</h2>
+
+  <p>When the OS loads your program, it maps different parts of the binary into virtual memory with different permissions. These permissions are enforced by the CPU's Memory Management Unit (MMU) — violating them raises a hardware exception (segfault / access violation).</p>
+
+  <table>
+    <tr><th>Section</th><th>Read</th><th>Write</th><th>Execute</th><th>Contents</th></tr>
+    <tr><td><code>.text</code></td><td>✓</td><td>✗</td><td>✓</td><td>Your instructions</td></tr>
+    <tr><td><code>.data</code></td><td>✓</td><td>✓</td><td>✗</td><td>Initialized global variables</td></tr>
+    <tr><td><code>.rodata</code> / <code>.rdata</code></td><td>✓</td><td>✗</td><td>✗</td><td>String literals, constants</td></tr>
+    <tr><td><code>.bss</code></td><td>✓</td><td>✓</td><td>✗</td><td>Uninitialized globals (zeroed)</td></tr>
+    <tr><td>Stack</td><td>✓</td><td>✓</td><td>✗</td><td>Local variables, return addresses</td></tr>
+    <tr><td>Heap</td><td>✓</td><td>✓</td><td>✗</td><td>malloc'd memory</td></tr>
+  </table>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — NX and W^X</div>
+    The rule that writable memory is not executable (and vice versa) is called <strong>W⊕X</strong> (Write XOR Execute) or <strong>NX/DEP</strong>. It is a hardware-enforced mitigation against shellcode injection. If an attacker overflows a buffer and injects shellcode into the stack or heap, the CPU will refuse to execute it because those regions are marked non-executable. Module 18 (Stack Exploitation) shows exactly how this protection is implemented and what Return-Oriented Programming does to circumvent it.
+  </div>
+
+  <h2>Data Directives: Defining Values in Memory</h2>
+
+  <p>NASM provides directives that let you embed data directly into your binary at a specific section and offset. The directive name indicates the <em>width</em> of each value:</p>
+
+  <table>
+    <tr><th>Directive</th><th>Width</th><th>Example</th><th>Bytes produced</th></tr>
+    <tr><td><code>db</code></td><td>1 byte</td><td><code>db 0x41</code></td><td><code>41</code></td></tr>
+    <tr><td><code>dw</code></td><td>2 bytes</td><td><code>dw 0x1234</code></td><td><code>34 12</code></td></tr>
+    <tr><td><code>dd</code></td><td>4 bytes</td><td><code>dd 0xDEADBEEF</code></td><td><code>EF BE AD DE</code></td></tr>
+    <tr><td><code>dq</code></td><td>8 bytes</td><td><code>dq 0x0102030405060708</code></td><td><code>08 07 06 05 04 03 02 01</code></td></tr>
+  </table>
+
+  <p>Notice the bytes are always reversed in memory. This is <strong>little-endian</strong> byte order — the <em>least significant byte</em> comes first (at the lowest address). All x86 and x86-64 processors are little-endian.</p>
+
+  <h2>Little-Endian Byte Order, Explained</h2>
+
+  <p>When you write <code>dw 0x1234</code>, you might expect to see <code>12 34</code> in memory. But x86 is little-endian — the byte with the lowest value (least significant byte) comes first at the lowest address. So <code>0x1234</code> is stored as <code>34</code> at address N and <code>12</code> at address N+1.</p>
+
+  <div class="byte-grid">
+    <div class="byte-box"><div class="addr">N+0</div><div class="val">34</div><div class="note">LSB</div></div>
+    <div class="byte-box"><div class="addr">N+1</div><div class="val">12</div><div class="note">MSB</div></div>
+  </div>
+
+  <p>When the CPU reads those two bytes back into a register using a <code>mov ax, [N]</code> instruction, it reassembles them correctly: <code>ax = 0x1234</code>. The byte reversal happens transparently during load and store.</p>
+
+  <div class="callout warn">
+    <div class="label">Why This Trips Up Security Researchers</div>
+    When you look at a hex dump of a packet, a binary file, or a memory region, the bytes are shown in <em>memory order</em> (little-endian). A 32-bit integer that logically is <code>0xDEADBEEF</code> appears in a hex dump as <code>EF BE AD DE</code>. When writing exploits, crafting file format parsers, or interpreting network traffic, you must constantly translate between "logical value" and "bytes on the wire/disk". This confusion is the source of many off-by-one and byte-swap bugs.
+  </div>
+
+  <h2>Two's Complement: How Negative Numbers Work</h2>
+
+  <p>The CPU does not have separate circuits for signed and unsigned arithmetic. It uses the same <code>add</code> and <code>sub</code> instructions for both. The trick is <strong>two's complement</strong>: negative numbers are represented so that addition wraps correctly.</p>
+
+  <p>To negate a number in two's complement: flip all bits, then add 1.</p>
+
+  <pre><code> 1   in binary (8-bit):  0000 0001
+~1 (flip all bits):      1111 1110
+~1 + 1 = -1:            1111 1111  =  0xFF
+
+ 127 in binary (8-bit):  0111 1111  =  0x7F
+-128 in binary (8-bit):  1000 0000  =  0x80   (the most negative 8-bit value)</code></pre>
+
+  <p>The key insight is that the bit pattern <code>0xFF</code> means <strong>255 as unsigned</strong> and <strong>-1 as signed</strong>. The CPU doesn't know which you intend — you tell it by choosing signed vs unsigned instructions (<code>jl</code> vs <code>jb</code>, <code>imul</code> vs <code>mul</code>, etc.).</p>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — Signed/Unsigned Confusion</div>
+    Many vulnerabilities arise from mixing signed and unsigned interpretations. A classic: a length field is read as <code>int32_t</code>, checked with <code>if (len &gt; MAX)</code> (signed comparison — passes for negative values), then passed to <code>memcpy</code> which treats it as <code>size_t</code> (unsigned — now it's 4 billion bytes). This pattern appears in CVE-2021-3156 (sudo heap overflow), CVE-2018-5407, and hundreds more.
+  </div>
+
+  <h2>IEEE 754 Floating Point — The Bit Layout</h2>
+
+  <p>A 32-bit float (<code>dd 1.0</code>) is stored as three fields packed into 32 bits:</p>
+
+  <table>
+    <tr><th>Field</th><th>Bits</th><th>For 1.0</th><th>Value</th></tr>
+    <tr><td>Sign</td><td>31</td><td>0</td><td>positive</td></tr>
+    <tr><td>Exponent</td><td>30–23</td><td>01111111 = 127</td><td>Biased exponent: 127 - 127 = 0, so 2⁰ = 1</td></tr>
+    <tr><td>Mantissa</td><td>22–0</td><td>000...000</td><td>Implicit leading 1, no fractional bits</td></tr>
+  </table>
+
+  <p>So <code>1.0</code> as hex is <code>0x3F800000</code>. In memory (little-endian): <code>00 00 80 3F</code>. The hex dump in the program will confirm this.</p>
+
+  <h2>Uninitialized Data: .bss</h2>
+
+  <p>Variables in <code>.bss</code> are not stored in the binary file. The binary only records how many bytes of <code>.bss</code> space the program needs. The OS loader allocates that many zeroed pages and maps them into the process's virtual address space. This has two implications:</p>
+  <ul>
+    <li>A 1 MB global array in <code>.bss</code> adds nearly zero bytes to the binary on disk</li>
+    <li>All <code>.bss</code> values are guaranteed to be zero at program start — no need to initialize them explicitly</li>
+  </ul>
+
+  <div class="callout tip">
+    <div class="label">Tip — resb vs db 0</div>
+    Use <code>resb N</code> in <code>.bss</code> (reserve N uninitialized bytes). Do not use <code>db 0, 0, 0...</code> in <code>.data</code> just to get zeros — that wastes space in the binary. The distinction is: <code>.data</code> bytes appear in the binary file; <code>.bss</code> bytes do not.
+  </div>
+
+  <h2>Code Walkthrough: data.asm</h2>
+
+  <pre><code><span class="comment">; Defining data with directives</span>
+<span class="kw">section</span> .data
+
+<span class="lbl">byte_vals</span>  <span class="kw">db</span> <span class="num">0x41</span>, <span class="num">0x42</span>, <span class="num">0x43</span>, <span class="num">0x44</span>  <span class="comment">; 4 bytes: 41 42 43 44 ('A','B','C','D')</span>
+<span class="lbl">byte_count</span> <span class="kw">equ</span> $ - byte_vals           <span class="comment">; $ = current position; result = 4</span>
+
+<span class="lbl">word_vals</span>  <span class="kw">dw</span> <span class="num">0x1234</span>, <span class="num">0x5678</span>          <span class="comment">; 4 bytes: 34 12 78 56  (little-endian!)</span>
+
+<span class="lbl">dword_val</span>  <span class="kw">dd</span> <span class="num">0xDEADBEEF</span>              <span class="comment">; 4 bytes: EF BE AD DE</span>
+
+<span class="lbl">qword_val</span>  <span class="kw">dq</span> <span class="num">0x0102030405060708</span>      <span class="comment">; 8 bytes: 08 07 06 05 04 03 02 01</span>
+
+<span class="lbl">neg_one</span>    <span class="kw">dq</span> -<span class="num">1</span>                       <span class="comment">; 8 bytes: FF FF FF FF FF FF FF FF</span>
+
+<span class="lbl">float_one</span>  <span class="kw">dd</span> <span class="num">1.0</span>                      <span class="comment">; 4 bytes: 00 00 80 3F (= 0x3F800000)</span>
+
+<span class="kw">section</span> .bss
+<span class="lbl">bss_buf</span>    <span class="kw">resb</span> <span class="num">16</span>                     <span class="comment">; reserve 16 bytes — OS will zero them</span>
+
+<span class="comment">; Loading a qword from memory into a register:</span>
+<span class="kw">section</span> .text
+    <span class="kw">mov</span> <span class="reg">rax</span>, [<span class="kw">rel</span> <span class="lbl">qword_val</span>]         <span class="comment">; rax = 0x0102030405060708</span>
+                                        <span class="comment">; CPU reassembles little-endian bytes transparently</span></code></pre>
+
+  <h2>Build &amp; Run</h2>
+
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_03 &amp;&amp; make &amp;&amp; ./data_demo<br/>
+    <span class="out"><br/>=== db: individual bytes ===<br/>
+  bytes: 41 42 43 44<br/>
+<br/>=== dw: 16-bit words (little-endian in memory) ===<br/>
+  bytes: 34 12 78 56<br/>
+<br/>=== dd: 32-bit dwords ===<br/>
+  bytes: EF BE AD DE<br/>
+<br/>=== dq: 64-bit qwords ===<br/>
+  bytes: 08 07 06 05 04 03 02 01<br/>
+  u64  decimal:    72623859790382856   hex: 0x0102030405060708<br/>
+<br/>=== Two's complement: negative numbers ===<br/>
+  s64  decimal:                   -1<br/>
+  u64  decimal: 18446744073709551615   hex: 0xFFFFFFFFFFFFFFFF<br/>
+<br/>=== IEEE 754 float 1.0 as raw bits ===<br/>
+  bytes: 00 00 80 3F<br/>
+<br/>=== .bss: uninitialized storage (zeroed by OS) ===<br/>
+  bytes: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00</span>
+  </div>
+
+  <h2>Exercises</h2>
+
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Predict the hex dump</h4>
+    <p>Before running, write down on paper what you expect the hex dump to show for <code>dw 0xABCD</code> and <code>dd 0x00010203</code>. Then add those two definitions to <code>data.asm</code>, hex-dump them, and check your predictions.</p>
+  </div>
+
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Two's complement negatives</h4>
+    <p>Add three more values to <code>.data</code>: <code>dq -2</code>, <code>dq -256</code>, <code>dq -32768</code>. Hex-dump each one. For each value, verify the result manually: take the absolute value, write it in binary, flip all bits, add 1, convert to hex. Does it match?</p>
+  </div>
+
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. Decode the IEEE 754 float</h4>
+    <p>The hex dump of <code>1.0</code> is <code>00 00 80 3F</code>. Reassemble the bytes in big-endian order: <code>3F 80 00 00</code> = <code>0x3F800000</code>. Now extract the three fields: bit 31 (sign), bits 30–23 (exponent), bits 22–0 (mantissa). What is the exponent bias for 32-bit floats? What real exponent does the stored value represent? What is the implicit leading bit of the mantissa? Write out the mathematical formula and confirm it equals 1.0.</p>
+  </div>
+
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. Attempt a .rodata write (deliberately cause a crash)</h4>
+    <p>Add a string label to <code>.rodata</code>. Then in the <code>.text</code> section, get its address into <code>rdi</code> and try to write a byte: <code>mov byte [rdi], 0x41</code>. Build and run. The program should crash with a segfault. Run it under GDB, catch the SIGSEGV, and use <code>info signal</code> and <code>x/i $rip</code> to identify the exact instruction that caused the fault. This confirms that <code>.rodata</code> permissions are enforced at the hardware level.</p>
+  </div>
+
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>5. Observe .bss in the binary vs at runtime</h4>
+    <p>Run <code>readelf -S data_demo</code> (Linux) or <code>objdump -h data_demo</code>. Find the <code>.bss</code> section. Note its <em>file size</em> (should be 0) and its <em>memory size</em> (should be 17 — 16 bytes for bss_buf + 8 for bss_counter). This is the p_filesz vs p_memsz distinction that tells the loader "allocate this much zeroed memory even though there's nothing in the file for it."</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_04/tutorial.html" style="color:inherit;">What's Next — Module 04: Arithmetic &amp; the ALU</a></h2>
+    <p>You now know how values are represented in memory. Module 04 puts the ALU to work: <code>add</code>, <code>sub</code>, <code>imul</code>, <code>idiv</code>, multi-precision arithmetic with <code>adc</code>/<code>sbb</code>, and the precise flag behaviour of each instruction. The new file is <code>arith.asm</code>, which performs a 64×64→128-bit unsigned multiply using the <code>rdx:rax</code> result pair — something impossible to express in a single C statement.</p>
+  </div>
+
+</div>
+</body>
+</html>

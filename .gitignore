@@ -1,0 +1,33 @@
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code / agent workspace
+.claude/
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Build artifacts (NASM/GCC/ld pipeline)
+*.o
+*.obj
+*.exe
+*.out
+*.bin
+*.elf
+*.map
+*.lst
+*.log
+
+# Object/binary output directories used by module Makefiles
+build/
+bin/
+obj/
+
+# Core dumps from exploit/stack modules
+core
+core.*
+vgcore.*

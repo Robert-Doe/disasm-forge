@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 02 — Registers: Every Single One</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;
+    --border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;
+    --red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;
+    --text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}
+  ul,ol{margin:12px 0 20px 28px;}
+  li{margin-bottom:8px;}
+  a{color:var(--cyan);}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:0.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}
+  .kw{color:var(--cyan);}
+  .reg{color:var(--purple);}
+  .num{color:var(--orange);}
+  .lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}
+  .callout.warn .label{color:var(--orange);}
+  .callout.insight .label{color:var(--purple);}
+  .callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}
+  .shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}
+  .ex-core .ex-label{color:var(--cyan);}
+  .ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+  .reg-diagram{display:grid;grid-template-columns:1fr;gap:4px;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:13px;}
+  .reg-row{display:flex;align-items:center;gap:8px;}
+  .reg-label{color:var(--purple);width:60px;text-align:right;flex-shrink:0;}
+  .reg-bits{display:flex;height:32px;flex:1;border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+  .bit-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+  .seg-64{flex:4;background:#1a1040;color:var(--purple);}
+  .seg-32{flex:4;background:#0d2040;color:var(--cyan);}
+  .seg-16{flex:2;background:#0d3320;color:var(--green);}
+  .seg-h{flex:1;background:#2d1a00;color:var(--orange);}
+  .seg-l{flex:1;background:#1a0d00;color:var(--orange);}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="badge">Module 02 of 21 &mdash; Foundations</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Registers: Every Single One</h1>
+  <p class="subtitle">The CPU's fastest storage — 16 general-purpose registers, every alias, every flag bit, and the segment registers that hide the Thread Environment Block.</p>
+</div>
+
+<div class="content">
+
+  <div class="prereq">
+    <strong>Prerequisites</strong> &mdash; Module 01 complete: NASM and GCC installed, comfortable running <code>make</code>, understand the assemble→link→run pipeline, have used GDB at least once.
+  </div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables">
+    <ul>
+      <li><code>registers.asm</code> — a program that demonstrates zero-extension, sub-register aliasing, the new r8–r15 registers, and the <code>xor eax,eax</code> zeroing idiom with live output</li>
+      <li>Deep mental model of every register in the x86-64 file — you will never be confused by <code>al</code> vs <code>ax</code> vs <code>eax</code> vs <code>rax</code> again</li>
+    </ul>
+  </div>
+
+  <h2>What Is a Register?</h2>
+
+  <p>The CPU cannot perform arithmetic on data sitting in RAM. Before the ALU (Arithmetic Logic Unit) can add two numbers together, both numbers must be in <strong>registers</strong> — small, named storage locations built directly into the processor silicon. Reading or writing a register takes one clock cycle. Reading or writing RAM takes tens to hundreds of cycles. Everything your code does ultimately flows through registers.</p>
+
+  <p>x86-64 has 16 general-purpose registers, each 64 bits (8 bytes) wide. They are named <code>rax</code>, <code>rbx</code>, <code>rcx</code>, <code>rdx</code>, <code>rsi</code>, <code>rdi</code>, <code>rbp</code>, <code>rsp</code>, and <code>r8</code> through <code>r15</code>. The names with an <strong>r</strong> prefix are the 64-bit forms. These are the registers you will use constantly.</p>
+
+  <p>But x86-64 didn't start as a 64-bit architecture. It grew from 16-bit (8086, 1978), to 32-bit (386, 1985), to 64-bit (AMD64, 2003). Each generation added wider registers while keeping the old names as <strong>aliases</strong> into the lower portion of the wider register. This is why reading disassembly is confusing until you have a clear picture of the register layout.</p>
+
+  <h2>The Register Alias Hierarchy</h2>
+
+  <p>Every 64-bit register contains within it a 32-bit register, which contains a 16-bit register, which contains two 8-bit registers. They are all the same physical storage — they just refer to different widths of it.</p>
+
+  <div class="reg-diagram">
+    <div class="reg-row">
+      <span class="reg-label">rax</span>
+      <div class="reg-bits">
+        <div class="bit-seg seg-64" style="flex:2;background:#1a1040;color:var(--purple)">bits 63–32</div>
+        <div class="bit-seg seg-32" style="flex:1;background:#0d2040;color:var(--cyan)">bits 31–16</div>
+        <div class="bit-seg seg-h" style="background:#2d1a00;color:var(--orange)">ah 15–8</div>
+        <div class="bit-seg seg-l" style="background:#3d2000;color:var(--gold)">al 7–0</div>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>Name</th><th>Width</th><th>Bits accessed</th><th>Historical name</th><th>Write zeroes upper?</th></tr>
+    <tr><td><code>rax</code></td><td>64-bit</td><td>63–0</td><td>—</td><td>—</td></tr>
+    <tr><td><code>eax</code></td><td>32-bit</td><td>31–0</td><td>386 accumulator</td><td><strong>YES — zeros bits 63–32</strong></td></tr>
+    <tr><td><code>ax</code></td><td>16-bit</td><td>15–0</td><td>8086 accumulator</td><td>No</td></tr>
+    <tr><td><code>ah</code></td><td>8-bit</td><td>15–8</td><td>8086 high byte</td><td>No</td></tr>
+    <tr><td><code>al</code></td><td>8-bit</td><td>7–0</td><td>8086 low byte</td><td>No</td></tr>
+  </table>
+
+  <div class="callout danger">
+    <div class="label">Critical Rule</div>
+    Writing to the <strong>32-bit</strong> sub-register (<code>eax</code>, <code>ebx</code>, <code>r8d</code>, etc.) <strong>zeros the upper 32 bits</strong> of the full 64-bit register. This is called <strong>zero-extension</strong>. Writing to the 8-bit or 16-bit sub-registers does <em>NOT</em> zero anything above them. This asymmetry is responsible for a large class of subtle bugs in assembly code.
+  </div>
+
+  <h2>All 16 General-Purpose Registers</h2>
+
+  <table>
+    <tr><th>64-bit</th><th>32-bit</th><th>16-bit</th><th>8-bit low</th><th>Conventional role</th></tr>
+    <tr><td><code>rax</code></td><td><code>eax</code></td><td><code>ax</code></td><td><code>al</code></td><td>Return value; accumulator</td></tr>
+    <tr><td><code>rbx</code></td><td><code>ebx</code></td><td><code>bx</code></td><td><code>bl</code></td><td>Callee-saved (you must preserve it)</td></tr>
+    <tr><td><code>rcx</code></td><td><code>ecx</code></td><td><code>cx</code></td><td><code>cl</code></td><td>4th arg (Linux); 1st arg (Windows); loop counter</td></tr>
+    <tr><td><code>rdx</code></td><td><code>edx</code></td><td><code>dx</code></td><td><code>dl</code></td><td>3rd arg (Linux); 2nd arg (Windows); 2nd return value</td></tr>
+    <tr><td><code>rsi</code></td><td><code>esi</code></td><td><code>si</code></td><td><code>sil</code></td><td>2nd arg (Linux); string source pointer</td></tr>
+    <tr><td><code>rdi</code></td><td><code>edi</code></td><td><code>di</code></td><td><code>dil</code></td><td>1st arg (Linux); string destination pointer</td></tr>
+    <tr><td><code>rbp</code></td><td><code>ebp</code></td><td><code>bp</code></td><td><code>bpl</code></td><td>Frame base pointer (callee-saved)</td></tr>
+    <tr><td><code>rsp</code></td><td><code>esp</code></td><td><code>sp</code></td><td><code>spl</code></td><td>Stack pointer — do not clobber casually</td></tr>
+    <tr><td><code>r8</code></td><td><code>r8d</code></td><td><code>r8w</code></td><td><code>r8b</code></td><td>5th arg (Linux); 3rd arg (Windows)</td></tr>
+    <tr><td><code>r9</code></td><td><code>r9d</code></td><td><code>r9w</code></td><td><code>r9b</code></td><td>6th arg (Linux); 4th arg (Windows)</td></tr>
+    <tr><td><code>r10</code></td><td><code>r10d</code></td><td><code>r10w</code></td><td><code>r10b</code></td><td>Caller-saved scratch</td></tr>
+    <tr><td><code>r11</code></td><td><code>r11d</code></td><td><code>r11w</code></td><td><code>r11b</code></td><td>Caller-saved scratch; clobbered by syscall</td></tr>
+    <tr><td><code>r12</code></td><td><code>r12d</code></td><td><code>r12w</code></td><td><code>r12b</code></td><td>Callee-saved</td></tr>
+    <tr><td><code>r13</code></td><td><code>r13d</code></td><td><code>r13w</code></td><td><code>r13b</code></td><td>Callee-saved</td></tr>
+    <tr><td><code>r14</code></td><td><code>r14d</code></td><td><code>r14w</code></td><td><code>r14b</code></td><td>Callee-saved</td></tr>
+    <tr><td><code>r15</code></td><td><code>r15d</code></td><td><code>r15w</code></td><td><code>r15b</code></td><td>Callee-saved</td></tr>
+  </table>
+
+  <div class="callout tip">
+    <div class="label">Tip — Caller vs Callee Saved</div>
+    <strong>Caller-saved</strong> registers (<code>rax</code>, <code>rcx</code>, <code>rdx</code>, <code>rsi</code>, <code>rdi</code>, <code>r8</code>–<code>r11</code>) can be destroyed by any function you call. If you need their values after a <code>call</code>, save them first. <strong>Callee-saved</strong> registers (<code>rbx</code>, <code>rbp</code>, <code>r12</code>–<code>r15</code>) must be preserved by any function that uses them — push them at the start and pop them at the end. Module 09 goes deep on this.
+  </div>
+
+  <h2>Special-Purpose Registers</h2>
+
+  <h3>rip — The Instruction Pointer</h3>
+  <p><code>rip</code> holds the address of the <em>next</em> instruction to execute. You cannot write to <code>rip</code> directly with <code>mov</code> — you change it with <code>jmp</code>, <code>call</code>, and <code>ret</code>. However, you <em>can</em> read it indirectly using RIP-relative addressing: <code>[rel label]</code> computes the address of <code>label</code> relative to the current value of <code>rip</code>. This is how position-independent code works.</p>
+
+  <h3>rflags — The Status Register</h3>
+  <p><code>rflags</code> is a 64-bit register where individual bits record the outcome of arithmetic operations. You never read it directly — instead, conditional jump instructions (<code>je</code>, <code>jl</code>, etc.) test specific bits of it. The bits you care about most:</p>
+
+  <table>
+    <tr><th>Flag</th><th>Bit</th><th>Set when...</th><th>Used by</th></tr>
+    <tr><td>CF — Carry</td><td>0</td><td>Unsigned overflow / borrow</td><td><code>jc</code>, <code>jnc</code>, <code>adc</code>, <code>sbb</code></td></tr>
+    <tr><td>ZF — Zero</td><td>6</td><td>Result is exactly zero</td><td><code>je</code>, <code>jne</code>, <code>jz</code>, <code>jnz</code></td></tr>
+    <tr><td>SF — Sign</td><td>7</td><td>Result's MSB is 1 (negative in two's complement)</td><td><code>js</code>, <code>jns</code></td></tr>
+    <tr><td>OF — Overflow</td><td>11</td><td>Signed overflow (result too large for signed type)</td><td><code>jo</code>, <code>jno</code></td></tr>
+    <tr><td>PF — Parity</td><td>2</td><td>Low byte of result has even number of 1-bits</td><td>Rare; used in some CRC algorithms</td></tr>
+    <tr><td>DF — Direction</td><td>10</td><td>String ops move backwards (set by <code>std</code>)</td><td><code>rep movsb</code> etc.</td></tr>
+    <tr><td>IF — Interrupt Enable</td><td>9</td><td>CPU will handle hardware interrupts</td><td>Kernel code only</td></tr>
+  </table>
+
+  <h3>Segment Registers — fs and gs</h3>
+  <p>In 64-bit mode the segment registers (<code>cs</code>, <code>ds</code>, <code>ss</code>, <code>es</code>) are mostly vestigial — the OS sets them up and they just hold fixed base addresses of 0. The exceptions are <code>fs</code> and <code>gs</code>, which the OS uses as base pointers for per-thread and per-CPU data.</p>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — The TEB</div>
+    On Windows, <code>gs:[0x30]</code> points to the <strong>Thread Environment Block (TEB)</strong> — a per-thread structure that contains the stack limits, the thread ID, the last error code, the TLS array, and much more. Shellcode and implants frequently read <code>gs:[0x60]</code> (which is the PEB pointer inside the TEB) to find the loaded module list and resolve API addresses without calling <code>LoadLibrary</code>. On Linux, <code>fs</code> points to the thread-local storage block. Module 15 (System Calls) shows the TEB/PEB walk technique in detail.
+  </div>
+
+  <h2>Code Walkthrough: registers.asm</h2>
+
+  <pre><code><span class="comment">; Demo 1 — Zero-extension rule</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0xDEADBEEFCAFEBABE</span>   <span class="comment">; fill all 64 bits</span>
+<span class="comment">; rax = 0xDEADBEEFCAFEBABE</span>
+
+<span class="kw">mov</span>  <span class="reg">eax</span>, <span class="num">0x12345678</span>            <span class="comment">; write to 32-bit sub-register</span>
+<span class="comment">; rax = 0x0000000012345678  ← top 32 bits ZEROED automatically</span>
+
+<span class="comment">; Demo 2 — 8-bit writes preserve upper bytes (no zero-extension)</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0xAAAAAAAAAAAAAAAA</span>    <span class="comment">; set a recognisable pattern</span>
+<span class="kw">mov</span>  <span class="reg">al</span>,  <span class="num">0x11</span>                  <span class="comment">; write lowest byte only</span>
+<span class="comment">; rax = 0xAAAAAAAAAAAAAA11  ← only byte 0 changed</span>
+
+<span class="kw">mov</span>  <span class="reg">ah</span>,  <span class="num">0x22</span>                  <span class="comment">; write byte 1</span>
+<span class="comment">; rax = 0xAAAAAAAAAAAA2211  ← bytes 1 and 0 now changed</span>
+
+<span class="kw">mov</span>  <span class="reg">eax</span>, <span class="num">0x55667788</span>            <span class="comment">; 32-bit write → zero-extends</span>
+<span class="comment">; rax = 0x0000000055667788  ← top 32 bits zeroed again</span>
+
+<span class="comment">; Demo 3 — xor eax,eax: the 2-byte zero idiom</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0xFFFFFFFFFFFFFFFF</span>
+<span class="kw">xor</span>  <span class="reg">eax</span>, <span class="reg">eax</span>                  <span class="comment">; eax XOR eax = 0; zero-extension clears top 32 bits</span>
+<span class="comment">; rax = 0x0000000000000000  ← full 64-bit zero in just 2 bytes</span></code></pre>
+
+  <div class="callout warn">
+    <div class="label">Common Mistake</div>
+    If you write <code>xor rax, rax</code> (using 64-bit operands) instead of <code>xor eax, eax</code>, the result is the same — but it encodes to 3 bytes instead of 2 because the REX.W prefix is required for a 64-bit operand. The compiler always uses <code>xor eax, eax</code>. Prefer it.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_02 &amp;&amp; make<br/>
+    <span class="prompt">$ </span>./registers<br/>
+    <span class="out"><br/>--- Zero-extension: writing to eax clears top 32 bits of rax ---<br/>
+decimal:  16045690984833335870   hex: 0xDEADBEEFCAFEBABE<br/>
+decimal:           305419896   hex: 0x0000000012345678<br/>
+<br/>--- Sub-register aliasing: al / ah / ax / eax / rax ---<br/>
+decimal: 12297829382473034257   hex: 0xAAAAAAAAAAAAAA11<br/>
+decimal: 12297829382472986129   hex: 0xAAAAAAAAAAAA2211<br/>
+decimal: 12297829382472949572   hex: 0xAAAAAAAAAAAA3344<br/>
+decimal:          1432778632   hex: 0x0000000055667788<br/>
+...</span>
+  </div>
+
+  <h2>Exercises</h2>
+
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Predict the output</h4>
+    <p>Before running the program, trace through the sub-register aliasing demo on paper. Start with <code>rax = 0xAAAAAAAAAAAAAAAA</code> and apply each instruction in turn. Write down the expected value of <code>rax</code> after each instruction. Run the program and check your predictions.</p>
+  </div>
+
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Observe in GDB</h4>
+    <p>Run <code>gdb ./registers</code> and break at <code>main</code>. Enable <code>layout regs</code>. Step through each <code>mov</code> instruction with <code>stepi</code> and watch the register panel update. Pay attention to which registers change and which don't. Specifically: after <code>mov al, 0x11</code> look at whether <code>rbx</code>, <code>rcx</code>, or any other register changed. They shouldn't — sub-register writes are isolated to that one register.</p>
+  </div>
+
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. Add bx/bh/bl demos</h4>
+    <p>Add a new demo section in <code>registers.asm</code> that shows the same aliasing behaviour for <code>rbx</code>/<code>ebx</code>/<code>bx</code>/<code>bh</code>/<code>bl</code>. Confirm that writing to <code>bl</code> does not affect bits 63–8, but writing to <code>ebx</code> zeros bits 63–32.</p>
+  </div>
+
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. Read the rflags register</h4>
+    <p>The instruction <code>pushfq</code> pushes the 64-bit <code>rflags</code> register onto the stack. After it, <code>pop rax</code> puts <code>rflags</code> into <code>rax</code>. Add code to: (a) do <code>xor eax, eax</code>, (b) <code>pushfq</code>, (c) <code>pop rax</code>, (d) call <code>print_u64</code> to show the value. The ZF (bit 6) should be set because the result was zero. Verify: is bit 6 of the printed value 1?</p>
+  </div>
+
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>5. Encode size comparison</h4>
+    <p>Assemble two versions of zeroing <code>rax</code>: one using <code>mov rax, 0</code> and one using <code>xor eax, eax</code>. Run <code>objdump -d -M intel registers.o</code> and find both instructions. Count the bytes for each encoding. Confirm that <code>xor eax, eax</code> is exactly 2 bytes and <code>mov rax, 0</code> is 7 bytes.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_03/tutorial.html" style="color:inherit;">What's Next — Module 03: Data Representation &amp; Memory</a></h2>
+    <p>Registers hold values, but where do those values come from? Module 03 teaches the <code>.data</code>, <code>.bss</code>, and <code>.rodata</code> memory sections, the data directives (<code>db</code>/<code>dw</code>/<code>dd</code>/<code>dq</code>) that let you define values in memory, two's complement signed integer representation, IEEE 754 floating-point bit layout, and little-endian byte order. The new file will be <code>data.asm</code>, which defines several values in <code>.data</code> and then reads them back into registers so you can see exactly how they are laid out in memory.</p>
+  </div>
+
+</div>
+</body>
+</html>

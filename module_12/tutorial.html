@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 12 — x87 FPU & SSE2 Scalar Floating Point</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+  .ieee-box{display:grid;grid-template-columns:30px 1fr 3fr;gap:2px;font-family:'Source Code Pro',monospace;font-size:13px;margin:20px 0;}
+  .ieee-cell{background:var(--bg3);border:1px solid var(--border);padding:6px 10px;text-align:center;}
+  .ieee-sign{background:#2a1a1a;border-color:var(--red);color:var(--red);}
+  .ieee-exp{background:#1a1a2a;border-color:var(--purple);color:var(--purple);}
+  .ieee-man{background:#0d1a1a;border-color:var(--teal);color:var(--teal);}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 12 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>x87 FPU &amp; SSE2 Scalar Floating Point</h1>
+  <p class="subtitle">Leave the integer pipeline behind. SSE2 scalar instructions process one IEEE 754 double at a time using xmm registers. The legacy x87 FPU stack still appears in old disassembly. Together they cover every floating-point pattern you will encounter in real binaries.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 09 (ABI: float arguments in xmm), Module 03 (IEEE 754 bit layout in <code>.data</code>).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>floats.asm</code> — SSE2 arithmetic, integer/float conversion, <code>ucomisd</code> comparison, <code>sqrtsd</code>, x87 stack, and a 3D dot-product function</li>
+  </ul></div>
+
+  <h2>IEEE 754 Double-Precision Recap</h2>
+  <p>Every <code>double</code> is 64 bits with three fields:</p>
+  <div class="ieee-box">
+    <div class="ieee-cell ieee-sign">S</div>
+    <div class="ieee-cell ieee-exp">Exponent (11 bits)</div>
+    <div class="ieee-cell ieee-man">Mantissa / Significand (52 bits)</div>
+  </div>
+  <ul>
+    <li><strong>Sign (bit 63):</strong> 0 = positive, 1 = negative</li>
+    <li><strong>Exponent (bits 62–52):</strong> biased by 1023. A stored value of 1023 means 2⁰ = 1.</li>
+    <li><strong>Mantissa (bits 51–0):</strong> the fractional part of the significand. The leading 1 bit is implicit (not stored) for normalized numbers.</li>
+  </ul>
+  <p>Special values: all-zero exponent = zero/denormal; all-one exponent with zero mantissa = ±infinity; all-one exponent with nonzero mantissa = NaN.</p>
+
+  <div class="callout insight">
+    <div class="label">Bit manipulation of floats — security relevance</div>
+    Because a <code>double</code> is just 64 bits in memory, you can load it with <code>mov rax, [addr]</code> and inspect or forge individual fields with integer bitwise instructions. Type confusion vulnerabilities in JIT engines (V8, SpiderMonkey, JavaScriptCore) frequently abuse this: an attacker forces an engine to treat a crafted float's bit pattern as a pointer, or vice versa. Module 12 gives you the bit-level intuition to follow those exploits.
+  </div>
+
+  <h2>The xmm Registers</h2>
+  <p>SSE2 adds 16 registers: <code>xmm0</code>–<code>xmm15</code> (128 bits each). For scalar double work, only the low 64 bits are used. The high 64 bits are preserved but irrelevant.</p>
+
+  <table>
+    <tr><th>Register range</th><th>ABI role (System V)</th><th>ABI role (Windows x64)</th></tr>
+    <tr><td>xmm0–xmm7</td><td>Argument 1–8 (float/double), also return value in xmm0</td><td>Argument 1–4 (xmm0–xmm3), return in xmm0</td></tr>
+    <tr><td>xmm8–xmm15</td><td>Caller-saved (scratch)</td><td>xmm8–xmm15 caller-saved; xmm6–xmm15 callee-saved for non-volatile use</td></tr>
+  </table>
+
+  <h2>SSE2 Scalar Double Instructions</h2>
+  <p>The naming convention is: <strong>mnemonic + s/p + d/s</strong> — s=scalar, p=packed; d=double, s=single.</p>
+
+  <table>
+    <tr><th>Instruction</th><th>Operation</th><th>Notes</th></tr>
+    <tr><td><code>movsd xmm0, [mem]</code></td><td>load double from memory</td><td>Most common load form</td></tr>
+    <tr><td><code>movsd [mem], xmm0</code></td><td>store double to memory</td><td></td></tr>
+    <tr><td><code>movsd xmm0, xmm1</code></td><td>copy double register to register</td><td>Leaves high 64 bits of dst unchanged</td></tr>
+    <tr><td><code>addsd xmm0, xmm1</code></td><td>xmm0 += xmm1</td><td>Destructive: dst is first operand</td></tr>
+    <tr><td><code>subsd xmm0, xmm1</code></td><td>xmm0 -= xmm1</td><td></td></tr>
+    <tr><td><code>mulsd xmm0, xmm1</code></td><td>xmm0 *= xmm1</td><td></td></tr>
+    <tr><td><code>divsd xmm0, xmm1</code></td><td>xmm0 /= xmm1</td><td>Slow — ~20 cycles</td></tr>
+    <tr><td><code>sqrtsd xmm0, xmm1</code></td><td>xmm0 = √xmm1</td><td>Slow — ~20 cycles</td></tr>
+    <tr><td><code>ucomisd xmm0, xmm1</code></td><td>Set ZF/CF/PF based on compare</td><td>Use ja/jb/je/jp after this</td></tr>
+    <tr><td><code>cvtsi2sd xmm0, rax</code></td><td>int64 → double</td><td>Exact for integers ≤ 2⁵³</td></tr>
+    <tr><td><code>cvttsd2si rax, xmm0</code></td><td>double → int64 (truncate)</td><td>C cast: (int64_t)x</td></tr>
+    <tr><td><code>cvtsd2si rax, xmm0</code></td><td>double → int64 (round)</td><td>Uses current rounding mode</td></tr>
+  </table>
+
+  <h2>Float Arithmetic in Assembly</h2>
+  <pre><code><span class="comment">; 1.0 + 2.0 = 3.0</span>
+    <span class="kw">movsd</span> <span class="reg">xmm0</span>, [<span class="kw">rel</span> <span class="lbl">val_1_0</span>]   <span class="comment">; xmm0 = 1.0</span>
+    <span class="kw">movsd</span> <span class="reg">xmm1</span>, [<span class="kw">rel</span> <span class="lbl">val_2_0</span>]   <span class="comment">; xmm1 = 2.0</span>
+    <span class="kw">addsd</span> <span class="reg">xmm0</span>, <span class="reg">xmm1</span>            <span class="comment">; xmm0 = 3.0</span>
+
+<span class="comment">; Integer to double and back</span>
+    <span class="kw">mov</span>    <span class="reg">rax</span>, <span class="num">42</span>
+    <span class="kw">cvtsi2sd</span> <span class="reg">xmm0</span>, <span class="reg">rax</span>          <span class="comment">; xmm0 = 42.0</span>
+
+    <span class="kw">movsd</span> <span class="reg">xmm0</span>, [<span class="kw">rel</span> <span class="lbl">val_pi</span>]    <span class="comment">; xmm0 = 3.14159...</span>
+    <span class="kw">cvttsd2si</span> <span class="reg">rax</span>, <span class="reg">xmm0</span>         <span class="comment">; rax = 3 (truncated)</span></code></pre>
+
+  <h2>Floating-Point Comparisons with ucomisd</h2>
+  <pre><code>    <span class="kw">movsd</span> <span class="reg">xmm0</span>, [<span class="kw">rel</span> <span class="lbl">a</span>]
+    <span class="kw">movsd</span> <span class="reg">xmm1</span>, [<span class="kw">rel</span> <span class="lbl">b</span>]
+    <span class="kw">ucomisd</span> <span class="reg">xmm0</span>, <span class="reg">xmm1</span>          <span class="comment">; compare a vs b</span>
+    <span class="kw">ja</span>  <span class="lbl">.a_greater</span>              <span class="comment">; a > b (unsigned above = CF=0 and ZF=0)</span>
+    <span class="kw">je</span>  <span class="lbl">.equal</span>                  <span class="comment">; a == b (ZF=1, CF=0)</span>
+    <span class="kw">jb</span>  <span class="lbl">.b_greater</span>              <span class="comment">; a < b (CF=1)</span>
+    <span class="kw">jp</span>  <span class="lbl">.unordered</span>              <span class="comment">; one operand is NaN (PF=1)</span></code></pre>
+
+  <div class="callout warn">
+    <div class="label">NaN Propagation</div>
+    Any arithmetic with NaN produces NaN. <code>ucomisd</code> with a NaN sets PF=1 (parity flag). The condition <code>jp</code> (jump if parity) is how you detect NaN after a comparison. Forgetting to check PF on NaN inputs is a common source of incorrect floating-point comparisons in hand-written assembly.
+  </div>
+
+  <h2>The x87 FPU Stack</h2>
+  <p>The x87 FPU predates SSE2. It is a stack of eight 80-bit extended-precision registers (st0–st7). Unlike SSE2, operations always involve st0 (the top of stack). The stack is still used by <code>fsin</code>, <code>fcos</code>, <code>ftan</code>, <code>fprem</code>, and other transcendentals not available in SSE2.</p>
+
+  <pre><code><span class="comment">; Compute 2 * pi using x87</span>
+    <span class="kw">fld</span>  <span class="kw">qword</span> [<span class="kw">rel</span> <span class="lbl">pi</span>]          <span class="comment">; push: st0 = pi</span>
+    <span class="kw">fld</span>  <span class="kw">qword</span> [<span class="kw">rel</span> <span class="lbl">two</span>]         <span class="comment">; push: st0 = 2.0, st1 = pi</span>
+    <span class="kw">fmulp</span>                        <span class="comment">; st0 = st0 * st1, pop → st0 = 2*pi</span>
+    <span class="kw">sub</span>  <span class="reg">rsp</span>, <span class="num">8</span>
+    <span class="kw">fstp</span> <span class="kw">qword</span> [<span class="reg">rsp</span>]             <span class="comment">; pop st0 into memory</span>
+    <span class="kw">movsd</span> <span class="reg">xmm0</span>, [<span class="reg">rsp</span>]            <span class="comment">; bring into xmm for SSE use</span>
+    <span class="kw">add</span>  <span class="reg">rsp</span>, <span class="num">8</span>
+
+<span class="comment">; sin(pi) using x87</span>
+    <span class="kw">fld</span>  <span class="kw">qword</span> [<span class="kw">rel</span> <span class="lbl">pi</span>]          <span class="comment">; st0 = pi</span>
+    <span class="kw">fsin</span>                         <span class="comment">; st0 = sin(pi) ≈ 1.2e-16 (float rounding)</span>
+    <span class="kw">fstp</span> <span class="kw">qword</span> [<span class="reg">rsp</span>-<span class="num">8</span>]           <span class="comment">; (inside a leaf, red zone)</span></code></pre>
+
+  <h2>Dot Product Implementation</h2>
+  <pre><code><span class="comment">; asm_dot3(const double *a, const double *b) → xmm0 = a·b</span>
+<span class="lbl">asm_dot3:</span>
+    <span class="kw">movsd</span> <span class="reg">xmm0</span>, [<span class="reg">rdi</span>]           <span class="comment">; xmm0 = a[0]</span>
+    <span class="kw">mulsd</span> <span class="reg">xmm0</span>, [<span class="reg">rsi</span>]           <span class="comment">; xmm0 = a[0]*b[0]</span>
+
+    <span class="kw">movsd</span> <span class="reg">xmm1</span>, [<span class="reg">rdi</span>+<span class="num">8</span>]         <span class="comment">; a[1]</span>
+    <span class="kw">mulsd</span> <span class="reg">xmm1</span>, [<span class="reg">rsi</span>+<span class="num">8</span>]         <span class="comment">; a[1]*b[1]</span>
+
+    <span class="kw">movsd</span> <span class="reg">xmm2</span>, [<span class="reg">rdi</span>+<span class="num">16</span>]        <span class="comment">; a[2]</span>
+    <span class="kw">mulsd</span> <span class="reg">xmm2</span>, [<span class="reg">rsi</span>+<span class="num">16</span>]        <span class="comment">; a[2]*b[2]</span>
+
+    <span class="kw">addsd</span> <span class="reg">xmm0</span>, <span class="reg">xmm1</span>            <span class="comment">; sum first two products</span>
+    <span class="kw">addsd</span> <span class="reg">xmm0</span>, <span class="reg">xmm2</span>            <span class="comment">; add third → return in xmm0</span>
+    <span class="kw">ret</span></code></pre>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_12 &amp;&amp; make &amp;&amp; ./floats<br/>
+    <span class="out">=== SSE2 scalar: movsd / addsd / mulsd / divsd ===<br/>
+  fval: 3.141593<br/>
+  fval: 3.000000<br/>
+  fval: 6.283185<br/>
+  fval: 0.333333<br/>
+  fval: 2.000000<br/>
+=== Integer &lt;-&gt; float conversions ===<br/>
+  fval: 42.000000<br/>
+  fval: 1000000000.000000<br/>
+  val:  3                    0x3<br/>
+  val:  3                    0x3<br/>
+  val:  18446744073709551609  0xFFFFFFFFFFFFFFF9<br/>
+=== SSE2 float comparisons (ucomisd) ===<br/>
+  val:  1                    0x1<br/>
+=== sqrtsd: square roots ===<br/>
+  fval: 1.414214<br/>
+  fval: 1.732051<br/>
+=== x87 FPU stack: fld / fadd / fmul / fstp ===<br/>
+  fval: 6.283185<br/>
+  fval: 0.000000<br/>
+=== Dot product: a=[1.0,2.0,3.0] b=[4.0,5.0,6.0] ===<br/>
+  fval: 32.000000</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Inspect IEEE 754 bit patterns</h4>
+    <p>Store <code>1.0</code>, <code>-1.0</code>, <code>0.0</code>, and <code>Infinity</code> (<code>dq 0x7FF0000000000000</code>) in <code>.data</code>. Load each with <code>mov rax, [rel label]</code> (integer load) and print the raw hex with <code>print_u64</code>. Verify: 1.0 = <code>0x3FF0000000000000</code>, -1.0 = <code>0xBFF0000000000000</code>, 0.0 = <code>0x0</code>.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Implement fabs and fneg without x87</h4>
+    <p>The sign bit is bit 63. Implement absolute value by clearing bit 63 (<code>and rax, 0x7FFFFFFFFFFFFFFF</code>) and negate by toggling bit 63 (<code>xor rax, 0x8000000000000000</code>). Move the result back into xmm via memory (<code>mov [rsp-8], rax; movsd xmm0, [rsp-8]</code>) and verify with <code>print_f64</code>. This is exactly how compilers implement <code>fabs</code> and unary negation without a dedicated instruction.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Implement Horner's method for polynomial evaluation</h4>
+    <p>Evaluate the polynomial <code>p(x) = 3x³ + 2x² + x + 5</code> at <code>x = 2.0</code> using Horner's form: <code>((3x + 2)x + 1)x + 5</code>. Store the coefficients as a <code>dq</code> array <code>[3.0, 2.0, 1.0, 5.0]</code>. Write a loop that reads from the array and applies one <code>mulsd</code> + <code>addsd</code> per iteration. Expected result: <code>3×8 + 2×4 + 2 + 5 = 24 + 8 + 2 + 5 = 39.0</code>.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_13/tutorial.html" style="color:inherit;">What's Next — Module 13: SIMD &mdash; SSE, AVX &amp; Packed Data</a></h2>
+    <p>Module 13 moves from scalar (one value per instruction) to packed (2–4 doubles or 4–8 floats per instruction). You will use <code>movapd</code>, <code>addpd</code>, <code>mulpd</code>, and AVX's 256-bit <code>vmulpd</code> (four doubles at once) to implement a vectorized dot product that is 4× faster than the scalar version. You will also see <code>pshufb</code>, <code>punpcklbw</code>, and other integer SIMD patterns used in crypto and parsing.</p>
+  </div>
+</div>
+</body>
+</html>

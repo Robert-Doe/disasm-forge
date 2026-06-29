@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 10 — Memory Addressing Modes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}a{color:var(--cyan);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 10 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Memory Addressing Modes</h1>
+  <p class="subtitle">Five ways to tell the CPU where to find data — from a constant baked into the instruction to [base + index×scale + displacement] — plus LEA tricks and RIP-relative position-independent access.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Modules 01–09: ABI complete, stack frames solid, data sections understood.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>addressing.asm</code> — exercises all five addressing modes, LEA arithmetic tricks, RIP-relative access, size-override loads, and a complete 2D array walk</li>
+    <li>The ability to decode any memory operand you encounter in disassembly</li>
+  </ul></div>
+
+  <h2>Why Addressing Modes Matter for Security</h2>
+  <p>Understanding addressing modes is how you read disassembly. Every memory access in a compiled binary uses one of these five forms. When you see <code>mov rax, [rbx + rcx*8 + 16]</code> in IDA or Ghidra, you need to instantly know: this loads 8 bytes from address <code>rbx + rcx×8 + 16</code>. If <code>rcx</code> is attacker-controlled, the question becomes: what address can the attacker make this instruction read from? How far can <code>rcx</code> reach? Can they make it read past array bounds? These questions are only answerable if you fully understand addressing modes.</p>
+
+  <h2>The Five Addressing Mode Families</h2>
+
+  <h3>1. Immediate</h3>
+  <p>The value is embedded directly in the instruction's encoding. No memory is accessed.</p>
+  <pre><code><span class="kw">mov</span> <span class="reg">rax</span>, <span class="num">42</span>         <span class="comment">; 42 is part of the instruction bytes</span>
+<span class="kw">add</span> <span class="reg">rax</span>, <span class="num">0xFF</span>       <span class="comment">; immediate operand</span></code></pre>
+
+  <h3>2. Register</h3>
+  <p>The value comes from a register. The fastest possible operand — no memory bus involved.</p>
+  <pre><code><span class="kw">mov</span> <span class="reg">rax</span>, <span class="reg">rbx</span>       <span class="comment">; value from register — zero latency</span></code></pre>
+
+  <h3>3. Direct (Absolute Address)</h3>
+  <p>The instruction encodes a fixed memory address. In 64-bit code this is usually expressed as a RIP-relative offset (see below) rather than a literal 64-bit address, because 64-bit absolute addresses require a REX prefix and 8 extra bytes of encoding.</p>
+  <pre><code><span class="kw">mov</span> <span class="reg">rax</span>, [<span class="kw">rel</span> <span class="lbl">my_var</span>]   <span class="comment">; read 8 bytes at the address of my_var</span></code></pre>
+
+  <h3>4. Register-Indirect</h3>
+  <p>The address is stored in a register. The instruction reads from that address.</p>
+  <pre><code><span class="kw">mov</span> <span class="reg">rax</span>, [<span class="reg">rbx</span>]        <span class="comment">; read from the address stored in rbx</span>
+<span class="kw">mov</span> [<span class="reg">rdi</span>], <span class="reg">rcx</span>        <span class="comment">; write rcx to the address stored in rdi</span></code></pre>
+
+  <h3>5. Scaled-Index (the Most Powerful Form)</h3>
+  <p>The full x86-64 addressing formula: <code>[base + index * scale + displacement]</code></p>
+  <ul>
+    <li><strong>base</strong>: any 64-bit register</li>
+    <li><strong>index</strong>: any 64-bit register except <code>rsp</code></li>
+    <li><strong>scale</strong>: must be exactly 1, 2, 4, or 8 (encoded in 2 bits of the SIB byte)</li>
+    <li><strong>displacement</strong>: signed 8-bit or 32-bit constant (0 if omitted)</li>
+  </ul>
+  <pre><code><span class="comment">; Access array[i] where each element is 8 bytes (scale=8)</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, [<span class="reg">rbx</span> + <span class="reg">rcx</span>*<span class="num">8</span>]
+
+<span class="comment">; Access struct array: each struct is 24 bytes — must compute manually</span>
+<span class="kw">imul</span> <span class="reg">rcx</span>, <span class="num">24</span>                    <span class="comment">; scale not 1/2/4/8, so pre-multiply</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, [<span class="reg">rbx</span> + <span class="reg">rcx</span> + <span class="num">8</span>]      <span class="comment">; base + pre-multiplied index + field offset</span>
+
+<span class="comment">; 2D array: int32_t a[3][4]  — access a[row][col]</span>
+<span class="comment">; element index = row*4 + col</span>
+<span class="kw">imul</span> <span class="reg">rax</span>, <span class="num">4</span>                     <span class="comment">; row * COLS</span>
+<span class="kw">add</span>  <span class="reg">rax</span>, <span class="reg">rcx</span>                   <span class="comment">; + col = element index</span>
+<span class="kw">mov</span>  <span class="reg">eax</span>, [<span class="reg">rbx</span> + <span class="reg">rax</span>*<span class="num">4</span>]        <span class="comment">; * sizeof(int32_t) = 4</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — Out-of-Bounds Reads</div>
+    In the pattern <code>[base + index*scale]</code>, if <code>index</code> is attacker-controlled with no bounds check, the attacker can compute what address the load will read from. With <code>scale=8</code> and a 64-bit index, the reachable address range is enormous. Many CVEs are exactly this: a length field controls the index, the bounds check is bypassed (signed/unsigned confusion, off-by-one), and arbitrary memory is read or written.
+  </div>
+
+  <h2>LEA: Address Arithmetic Without a Memory Access</h2>
+  <p><code>lea dst, [expr]</code> (Load Effective Address) computes the value of the bracket expression and stores it in <code>dst</code> — but it never reads from memory. It is pure arithmetic performed by the address generation unit (AGU), which runs in parallel with the ALU. This makes <code>lea</code> a fast way to do multi-operand arithmetic.</p>
+
+  <table>
+    <tr><th>Goal</th><th>Using lea</th><th>Equivalent arithmetic</th></tr>
+    <tr><td>Multiply by 3</td><td><code>lea rax, [rdi + rdi*2]</code></td><td><code>rax = rdi + rdi×2 = rdi×3</code></td></tr>
+    <tr><td>Multiply by 5</td><td><code>lea rax, [rdi + rdi*4]</code></td><td><code>rax = rdi + rdi×4 = rdi×5</code></td></tr>
+    <tr><td>Multiply by 9</td><td><code>lea rax, [rdi + rdi*8]</code></td><td><code>rax = rdi + rdi×8 = rdi×9</code></td></tr>
+    <tr><td>Add 3 values</td><td><code>lea rax, [rbx + rcx + 16]</code></td><td><code>rax = rbx + rcx + 16</code></td></tr>
+    <tr><td>Get array address</td><td><code>lea rax, [rbx + rdi*4]</code></td><td><code>rax = &amp;array[i]</code> (no load)</td></tr>
+  </table>
+
+  <h2>RIP-Relative Addressing</h2>
+  <p>In 64-bit Position-Independent Executables (PIE), the binary can load at any address chosen by ASLR. Absolute addresses are useless — the data's address changes every run. Instead, the CPU computes data addresses relative to the current instruction pointer (<code>rip</code>).</p>
+  <pre><code><span class="comment">; [rel label] encodes as: [rip + (label - next_instruction)]</span>
+<span class="comment">; The offset is fixed at link time; the absolute address varies per run</span>
+<span class="kw">lea</span>  <span class="reg">rax</span>, [<span class="kw">rel</span> <span class="lbl">my_string</span>]   <span class="comment">; rax = current address of my_string</span>
+<span class="kw">mov</span>  <span class="reg">rbx</span>, [<span class="kw">rel</span> <span class="lbl">my_var</span>]      <span class="comment">; rbx = value at current address of my_var</span></code></pre>
+
+  <div class="callout tip">
+    <div class="label">Tip — default rel in NASM</div>
+    Put <code>default rel</code> at the top of your NASM file to make all <code>[]</code> memory accesses RIP-relative by default. Then you don't need to write <code>rel</code> on every access. This matches the output of GCC for PIE binaries.
+  </div>
+
+  <h2>Size Overrides: BYTE, WORD, DWORD, QWORD</h2>
+  <pre><code><span class="kw">movzx</span> <span class="reg">rax</span>, <span class="kw">byte</span>  [<span class="reg">rbx</span>]    <span class="comment">; load 1 byte, zero-extend → 64 bits</span>
+<span class="kw">movzx</span> <span class="reg">rax</span>, <span class="kw">word</span>  [<span class="reg">rbx</span>]    <span class="comment">; load 2 bytes, zero-extend</span>
+<span class="kw">movsx</span> <span class="reg">rax</span>, <span class="kw">dword</span> [<span class="reg">rbx</span>]    <span class="comment">; load 4 bytes, sign-extend (for signed int)</span>
+<span class="kw">mov</span>   <span class="reg">eax</span>,       [<span class="reg">rbx</span>]    <span class="comment">; load 4 bytes, zero-extend (eax write zeroes upper 32)</span>
+<span class="kw">mov</span>   <span class="reg">rax</span>,       [<span class="reg">rbx</span>]    <span class="comment">; load 8 bytes</span></code></pre>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_10 &amp;&amp; make &amp;&amp; ./addressing<br/>
+    <span class="out">=== Scaled-index: [base + index*scale + disp] ===<br/>
+  val: 22                   0x16<br/>
+  val: 33                   0x21<br/>
+=== LEA: address arithmetic without memory access ===<br/>
+  val: 35                   0x23<br/>
+  val: 31                   0x1F<br/>
+=== 2D array walk using scaled-index ===<br/>
+  val: 10    val: 11    val: 12    val: 13<br/>
+  val: 20    val: 21    val: 22    val: 23<br/>
+  val: 30    val: 31    val: 32    val: 33</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Compute all addresses manually</h4>
+    <p>For the 3×4 array of <code>int32_t</code> in <code>.data</code>, compute the byte offset of every element from the base address on paper. Verify by running the program under GDB, setting a breakpoint at the 2D walk loop, and checking that the computed address matches your calculation each iteration.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Access a struct field using displacement</h4>
+    <p>Define a struct in <code>.data</code> as three consecutive qwords: <code>dq 100, 200, 300</code>. Using <code>lea rbx, [rel struct_base]</code>, access each field using displacements: <code>[rbx+0]</code>, <code>[rbx+8]</code>, <code>[rbx+16]</code>. Then define an array of 3 such structs (9 qwords) and access <code>array[1].field2</code> using <code>[rbx + 1*24 + 8]</code> where 24 = struct size and 8 = field2 offset.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. LEA multiply benchmark</h4>
+    <p>Implement multiply-by-7 using LEA (hint: 7 = 8 - 1, so <code>lea rax, [rdi*8]</code> then <code>sub rax, rdi</code>). Implement multiply-by-25 (25 = 5×5, so use two LEA instructions). Verify both with known inputs.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. Walk a linked list</h4>
+    <p>Define three nodes in <code>.data</code>, each as two qwords: <code>dq value, next_ptr</code>. Set the last node's <code>next_ptr</code> to 0 (null). Walk the list starting from the first node using register-indirect: <code>mov rax, [rbx]</code> (value), <code>mov rbx, [rbx+8]</code> (next). Print each value and stop when <code>rbx == 0</code>.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_11/tutorial.html" style="color:inherit;">What's Next — Module 11: String &amp; Array Operations</a></h2>
+    <p>Module 11 puts addressing modes to work on bulk memory operations. The <code>rep</code> prefix combined with string instructions (<code>movsb</code>, <code>stosb</code>, <code>scasb</code>, <code>cmpsb</code>) lets you copy, fill, scan, and compare memory regions with a single instruction. The new file is <code>strings.asm</code>, which implements <code>strlen</code>, <code>strcpy</code>, <code>memset</code>, and <code>memcmp</code> entirely in assembly and compares them against the libc versions for correctness.</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 15 — System Calls & Direct OS Interaction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .abi-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0;}
+  .abi-col{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;}
+  .abi-col h4{font-family:'Source Code Pro',monospace;color:var(--cyan);margin-bottom:12px;font-size:.95rem;}
+  .abi-col table{margin:0;}
+  .abi-col th,.abi-col td{padding:7px 10px;font-size:13px;}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 15 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>System Calls &amp; Direct OS Interaction</h1>
+  <p class="subtitle">The C library is gone. One instruction — <code>syscall</code> — transfers control to the kernel. You will call <code>write</code>, <code>read</code>, <code>open</code>, <code>mmap</code>, <code>mprotect</code>, and <code>exit</code> in pure assembly with no runtime at all. On Windows, the equivalent path goes through <code>VirtualAlloc</code> and <code>WriteConsoleA</code> at the Win32 API level.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 09 (Linux ABI, register conventions), Module 14 (ELF entry point, <code>_start</code>).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>syscalls.asm</code> — Linux: write/read/open/close/mmap/mprotect/munmap/brk/exit via <code>syscall</code>, linked with <code>ld</code> (zero libc)</li>
+    <li><code>win_api.asm</code> — Windows: WriteConsoleA, VirtualAlloc, VirtualProtect, VirtualFree via Win32 imports</li>
+  </ul></div>
+
+  <h2>How Syscalls Work</h2>
+  <p>User-space programs cannot touch hardware, kernel memory, or other processes directly. The only way to interact with the OS is through a controlled gate: the <strong>system call</strong>. On x86-64 Linux, issuing <code>syscall</code> causes the CPU to:</p>
+  <ol>
+    <li>Save <code>rip</code> (return address) into <code>rcx</code></li>
+    <li>Save <code>rflags</code> into <code>r11</code></li>
+    <li>Switch to ring 0 (kernel mode)</li>
+    <li>Jump to the kernel's syscall handler (address from <code>LSTAR</code> MSR)</li>
+    <li>The kernel reads <code>rax</code> to identify which syscall, reads arguments from registers, performs the operation, returns result in <code>rax</code></li>
+    <li>Execute <code>sysret</code>: restore <code>rip</code> from <code>rcx</code>, <code>rflags</code> from <code>r11</code>, switch back to ring 3</li>
+  </ol>
+
+  <div class="callout warn">
+    <div class="label">rcx is destroyed by syscall</div>
+    The <code>SYSCALL</code> instruction writes the return address into <code>rcx</code>, overwriting whatever was there. The Linux syscall ABI therefore uses <strong>r10</strong> for the 4th argument instead of rcx. This differs from the System V function call ABI where rcx is the 4th argument register. Never put a syscall's 4th argument in rcx — it will be gone when the kernel reads it.
+  </div>
+
+  <h2>Linux Syscall ABI</h2>
+  <div class="abi-grid">
+    <div class="abi-col">
+      <h4>Syscall Register Map</h4>
+      <table>
+        <tr><th>Register</th><th>Role</th></tr>
+        <tr><td><code>rax</code></td><td>Syscall number (in) / return value (out)</td></tr>
+        <tr><td><code>rdi</code></td><td>Argument 1</td></tr>
+        <tr><td><code>rsi</code></td><td>Argument 2</td></tr>
+        <tr><td><code>rdx</code></td><td>Argument 3</td></tr>
+        <tr><td><code>r10</code></td><td>Argument 4 (NOT rcx)</td></tr>
+        <tr><td><code>r8</code></td><td>Argument 5</td></tr>
+        <tr><td><code>r9</code></td><td>Argument 6</td></tr>
+        <tr><td><code>rcx</code>, <code>r11</code></td><td>Destroyed by SYSCALL</td></tr>
+      </table>
+    </div>
+    <div class="abi-col">
+      <h4>Essential Syscall Numbers</h4>
+      <table>
+        <tr><th>Number</th><th>Name</th></tr>
+        <tr><td><code>0</code></td><td>read</td></tr>
+        <tr><td><code>1</code></td><td>write</td></tr>
+        <tr><td><code>2</code></td><td>open</td></tr>
+        <tr><td><code>3</code></td><td>close</td></tr>
+        <tr><td><code>9</code></td><td>mmap</td></tr>
+        <tr><td><code>10</code></td><td>mprotect</td></tr>
+        <tr><td><code>11</code></td><td>munmap</td></tr>
+        <tr><td><code>12</code></td><td>brk</td></tr>
+        <tr><td><code>60</code></td><td>exit</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h2>sys_write — Printing Without stdio</h2>
+  <pre><code><span class="comment">; write(STDOUT=1, buf, len)</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">1</span>               <span class="comment">; SYS_WRITE</span>
+    <span class="kw">mov</span>  <span class="reg">rdi</span>, <span class="num">1</span>               <span class="comment">; fd = STDOUT</span>
+    <span class="kw">lea</span>  <span class="reg">rsi</span>, [<span class="kw">rel</span> <span class="lbl">message</span>]  <span class="comment">; buf</span>
+    <span class="kw">mov</span>  <span class="reg">rdx</span>, <span class="num">25</span>              <span class="comment">; len</span>
+    <span class="kw">syscall</span>                   <span class="comment">; rax = bytes written, or -errno</span></code></pre>
+
+  <h2>sys_open + sys_read + sys_close — File I/O</h2>
+  <pre><code><span class="comment">; open("/tmp/file", O_WRONLY|O_CREAT|O_TRUNC, 0644)</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">2</span>               <span class="comment">; SYS_OPEN</span>
+    <span class="kw">lea</span>  <span class="reg">rdi</span>, [<span class="kw">rel</span> <span class="lbl">path</span>]     <span class="comment">; const char *pathname (null-terminated)</span>
+    <span class="kw">mov</span>  <span class="reg">rsi</span>, <span class="num">0x241</span>           <span class="comment">; O_WRONLY|O_CREAT|O_TRUNC</span>
+    <span class="kw">mov</span>  <span class="reg">rdx</span>, <span class="num">0o644</span>           <span class="comment">; mode (NASM octal literal)</span>
+    <span class="kw">syscall</span>
+    <span class="kw">mov</span>  <span class="reg">r12</span>, <span class="reg">rax</span>             <span class="comment">; save fd (r12 = callee-saved across syscall)</span>
+
+<span class="comment">; read(fd, buf, 64)</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0</span>               <span class="comment">; SYS_READ</span>
+    <span class="kw">mov</span>  <span class="reg">rdi</span>, <span class="reg">r12</span>             <span class="comment">; fd</span>
+    <span class="kw">lea</span>  <span class="reg">rsi</span>, [<span class="kw">rel</span> <span class="lbl">read_buf</span>] <span class="comment">; buffer</span>
+    <span class="kw">mov</span>  <span class="reg">rdx</span>, <span class="num">64</span>              <span class="comment">; max bytes</span>
+    <span class="kw">syscall</span>                   <span class="comment">; rax = bytes actually read</span>
+
+<span class="comment">; close(fd)</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">3</span>               <span class="comment">; SYS_CLOSE</span>
+    <span class="kw">mov</span>  <span class="reg">rdi</span>, <span class="reg">r12</span>
+    <span class="kw">syscall</span></code></pre>
+
+  <h2>sys_mmap — The Shellcode Loader Pattern</h2>
+  <pre><code><span class="comment">; mmap(NULL, 4096, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANON, -1, 0)</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">9</span>               <span class="comment">; SYS_MMAP</span>
+    <span class="kw">xor</span>  <span class="reg">rdi</span>, <span class="reg">rdi</span>             <span class="comment">; addr = NULL (OS chooses)</span>
+    <span class="kw">mov</span>  <span class="reg">rsi</span>, <span class="num">4096</span>            <span class="comment">; size = one page</span>
+    <span class="kw">mov</span>  <span class="reg">rdx</span>, <span class="num">3</span>               <span class="comment">; PROT_READ | PROT_WRITE</span>
+    <span class="kw">mov</span>  <span class="reg">r10</span>, <span class="num">0x22</span>            <span class="comment">; MAP_PRIVATE | MAP_ANONYMOUS (4th arg = r10!)</span>
+    <span class="kw">mov</span>  <span class="reg">r8</span>, -<span class="num">1</span>               <span class="comment">; fd = -1</span>
+    <span class="kw">xor</span>  <span class="reg">r9</span>, <span class="reg">r9</span>               <span class="comment">; offset = 0</span>
+    <span class="kw">syscall</span>                   <span class="comment">; rax = mapped address</span>
+    <span class="kw">mov</span>  <span class="reg">r14</span>, <span class="reg">rax</span>             <span class="comment">; save mapped address</span>
+
+<span class="comment">; --- write payload bytes into the RW page ---</span>
+
+<span class="comment">; mprotect(addr, 4096, PROT_READ|PROT_EXEC)  -- make it executable</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">10</span>              <span class="comment">; SYS_MPROTECT</span>
+    <span class="kw">mov</span>  <span class="reg">rdi</span>, <span class="reg">r14</span>
+    <span class="kw">mov</span>  <span class="reg">rsi</span>, <span class="num">4096</span>
+    <span class="kw">mov</span>  <span class="reg">rdx</span>, <span class="num">5</span>               <span class="comment">; PROT_READ | PROT_EXEC</span>
+    <span class="kw">syscall</span>
+
+<span class="comment">; Now [r14] contains executable code — call it</span>
+    <span class="kw">call</span> <span class="reg">r14</span>                  <span class="comment">; jump into the shellcode</span></code></pre>
+
+  <div class="callout danger">
+    <div class="label">Security — W^X (Write XOR Execute)</div>
+    <p>The sequence above is how shellcode loaders work: allocate writable memory, write machine code into it, flip it executable, call it. Modern mitigations interrupt this chain:</p>
+    <ul>
+      <li><strong>NX/DEP</strong> — hardware enforcement: the CPU refuses to execute pages without the execute bit. mmap(PROT_WRITE) pages are not executable by default.</li>
+      <li><strong>W^X</strong> — OS policy: a page may be writable OR executable but not both simultaneously. mprotect fails if you try to set PROT_WRITE|PROT_EXEC.</li>
+      <li><strong>SELinux/AppArmor mmap rules</strong> — policy can deny mmap(PROT_EXEC) entirely for certain processes.</li>
+      <li><strong>Intel CET (Control-flow Enforcement Technology)</strong> — shadow stack + indirect branch tracking makes ROP/JOP much harder.</li>
+    </ul>
+  </div>
+
+  <h2>sys_exit — The Clean Shutdown</h2>
+  <pre><code><span class="comment">; exit(0)  — terminates the process immediately, no atexit handlers</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">60</span>              <span class="comment">; SYS_EXIT</span>
+    <span class="kw">xor</span>  <span class="reg">rdi</span>, <span class="reg">rdi</span>             <span class="comment">; exit code 0</span>
+    <span class="kw">syscall</span>
+    <span class="comment">; CPU never returns here</span></code></pre>
+
+  <h2>Build &amp; Run (Linux)</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_15 &amp;&amp; make<br/>
+    <span class="out">nasm -f elf64 -o syscalls.o syscalls.asm
+ld -o syscalls syscalls.o</span><br/>
+    <span class="prompt">$ </span>./syscalls<br/>
+    <span class="out">Hello from syscall write!
+Hello from syscall write!
+Opening /tmp/asm_test.txt ...
+Written by assembly syscall
+Allocated page via mmap
+00007F8B3D421000
+MAP!
+0000000000886000
+All syscall demos complete.</span><br/>
+    <span class="prompt">$ </span>file syscalls<br/>
+    <span class="out">syscalls: ELF 64-bit LSB executable, x86-64, statically linked, not stripped</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Implement sys_exit with a non-zero error code</h4>
+    <p>Modify <code>syscalls.asm</code> to count the number of bytes written in the first <code>SYS_WRITE</code> call (returned in <code>rax</code>). If the byte count is less than the expected length, call <code>SYS_EXIT</code> with exit code 1; otherwise exit with 0. Run the program and verify the exit code with <code>echo $?</code> after each run.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Implement itoa in pure assembly (no libc)</h4>
+    <p>Write <code>print_u64_decimal</code> that converts a 64-bit unsigned integer to decimal ASCII digits and calls <code>SYS_WRITE</code> to print it. Strategy: repeatedly divide by 10 with <code>xor rdx,rdx; div rbx</code> (rbx=10), push remainders, then print them in reverse. Use a 21-byte buffer on the stack (max digits for uint64). This makes your pure-assembly program able to print any number without <code>printf</code>.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Minimal HTTP request via sys_socket / sys_connect</h4>
+    <p>Using only syscalls, open a TCP connection to <code>127.0.0.1:8080</code> and send a minimal HTTP GET request. Syscall numbers: <code>socket=41</code>, <code>connect=42</code>, <code>send=44</code>, <code>recv=45</code>, <code>close=3</code>. Construct the <code>sockaddr_in</code> struct in <code>.bss</code> with the address family (AF_INET=2), port (htons(8080)), and IP (<code>127.0.0.1</code>). Start a listening server with <code>python3 -m http.server 8080</code> and verify your assembly sends valid HTTP. This is the core of a network tool or reverse shell written entirely in assembly.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_16/tutorial.html" style="color:inherit;">What's Next — Module 16: Linker &amp; Loader Internals</a></h2>
+    <p>Module 16 splits a program across two assembly files to see how the linker resolves references between compilation units. You will examine relocations (the patches the linker applies to fix cross-module addresses), understand global vs local symbol visibility, and trace what the dynamic linker does at program startup to resolve shared library symbols through the Procedure Linkage Table (PLT) and Global Offset Table (GOT).</p>
+  </div>
+</div>
+</body>
+</html>

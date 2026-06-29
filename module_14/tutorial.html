@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 14 — ELF & PE Binary Formats</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.num{color:var(--orange);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:13px;margin:16px 0;line-height:1.6;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .format-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:20px 0;}
+  .format-col{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px;}
+  .format-col h4{font-family:'Source Code Pro',monospace;color:var(--cyan);margin-bottom:12px;font-size:1rem;}
+  .format-col ul{margin:0;padding-left:20px;}
+  .format-col li{font-size:14px;margin-bottom:6px;color:var(--text);}
+  .hex-row{font-family:'Source Code Pro',monospace;font-size:13px;background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:12px 16px;margin:8px 0;}
+  .hex-byte{color:var(--orange);}.hex-ascii{color:var(--green);}.hex-muted{color:var(--muted);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 14 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>ELF &amp; PE Binary Formats</h1>
+  <p class="subtitle">Machine code lives inside containers. ELF (Linux) and PE (Windows) tell the OS loader where to put each section in memory, where the entry point is, and which shared libraries to link. Exploit development, binary patching, shellcode injection, and writing your own loader all start here.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Module 03 (sections: .text, .data, .rodata, .bss), Module 09 (linker output, extern declarations).</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>elf_reader.c</code> — parses an ELF64 binary: header, section headers, program headers, symbol table</li>
+    <li><code>pe_reader.c</code> — parses a PE32+ binary: DOS/COFF/Optional headers, section table, data directories</li>
+  </ul></div>
+
+  <h2>Why Binary Format Knowledge Matters for Security</h2>
+  <p>Every technique in exploit development touches binary formats:</p>
+  <ul>
+    <li><strong>Shellcode injection</strong> — you place raw bytes into a writable section and redirect <code>rip</code> into it. The page permission flags are in ELF program headers / PE section characteristics.</li>
+    <li><strong>ROP chains</strong> — you need gadget addresses, which are virtual addresses determined by <code>ImageBase</code> + section RVA + byte offset within the section.</li>
+    <li><strong>Binary patching</strong> — changing an instruction requires finding its file offset from the section's <code>PointerToRawData</code> + the instruction's offset within the section.</li>
+    <li><strong>Import hooking</strong> — redirecting a function call requires locating the Import Address Table (IAT) in the PE Data Directories and patching the function pointer.</li>
+    <li><strong>ASLR bypass</strong> — PIE ELF binaries have type <code>ET_DYN</code>; the base address randomized by the OS loader is added to all relative virtual addresses. Leaking a code pointer gives you the base.</li>
+  </ul>
+
+  <h2>ELF Format</h2>
+  <h3>File Layout</h3>
+  <p>An ELF file has four regions in order:</p>
+  <ol>
+    <li><strong>ELF Header</strong> (64 bytes) — magic, class, ABI, entry point, offsets to section and program header tables</li>
+    <li><strong>Program Header Table</strong> — describes memory segments (one per LOAD entry, mapped into virtual memory by the OS loader)</li>
+    <li><strong>Sections</strong> — the actual content: code, data, symbols, strings, relocations</li>
+    <li><strong>Section Header Table</strong> — metadata about each section (name, type, address, offset, size, flags)</li>
+  </ol>
+
+  <h3>ELF Header — Key Fields</h3>
+  <div class="hex-row">
+    <span class="hex-byte">7F 45 4C 46</span> <span class="hex-ascii">  .ELF</span>
+    <span class="hex-muted">  ← magic bytes at offset 0</span>
+  </div>
+
+  <table>
+    <tr><th>Field</th><th>Size</th><th>Meaning</th></tr>
+    <tr><td><code>e_ident[0..3]</code></td><td>4</td><td>Magic: <code>0x7F 'E' 'L' 'F'</code></td></tr>
+    <tr><td><code>e_ident[EI_CLASS]</code></td><td>1</td><td>1=ELF32, 2=ELF64</td></tr>
+    <tr><td><code>e_ident[EI_DATA]</code></td><td>1</td><td>1=little-endian, 2=big-endian</td></tr>
+    <tr><td><code>e_type</code></td><td>2</td><td>ET_EXEC=2 (fixed-addr), ET_DYN=3 (PIE/shared)</td></tr>
+    <tr><td><code>e_entry</code></td><td>8</td><td>Virtual address of entry point (<code>_start</code>)</td></tr>
+    <tr><td><code>e_phoff</code></td><td>8</td><td>File offset to program header table</td></tr>
+    <tr><td><code>e_shoff</code></td><td>8</td><td>File offset to section header table</td></tr>
+    <tr><td><code>e_shstrndx</code></td><td>2</td><td>Index of section containing section name strings</td></tr>
+  </table>
+
+  <h3>Section Header — Key Fields</h3>
+  <table>
+    <tr><th>Field</th><th>Meaning</th></tr>
+    <tr><td><code>sh_name</code></td><td>Offset into .shstrtab (section name string table)</td></tr>
+    <tr><td><code>sh_type</code></td><td>PROGBITS, SYMTAB, STRTAB, NOBITS (.bss), RELA, etc.</td></tr>
+    <tr><td><code>sh_flags</code></td><td>SHF_WRITE | SHF_ALLOC | SHF_EXECINSTR</td></tr>
+    <tr><td><code>sh_addr</code></td><td>Virtual address when loaded (0 for non-loaded sections)</td></tr>
+    <tr><td><code>sh_offset</code></td><td>File offset to section content</td></tr>
+    <tr><td><code>sh_size</code></td><td>Section size in bytes</td></tr>
+  </table>
+
+  <h3>Program Header — Segments vs Sections</h3>
+  <p>Sections are for the linker; segments are for the loader. A LOAD segment describes a contiguous range of the file to be mapped into virtual memory at a given address with given permissions (R/W/X). Typically:</p>
+  <ul>
+    <li><strong>First LOAD segment</strong> — <code>.text</code> + <code>.rodata</code>, permissions <code>R--X</code></li>
+    <li><strong>Second LOAD segment</strong> — <code>.data</code> + <code>.bss</code>, permissions <code>RW-</code></li>
+    <li><strong>GNU_STACK segment</strong> — permissions specify whether the stack is executable (<code>RWX</code> = vulnerable, <code>RW-</code> = NX enabled)</li>
+  </ul>
+
+  <div class="callout insight">
+    <div class="label">Security Insight — NX Stack</div>
+    The <code>GNU_STACK</code> program header controls whether the process stack is executable. If its flags include <code>PF_X</code> (execute), the kernel marks the stack pages executable, allowing classic shellcode injection. Modern binaries compiled without <code>-z execstack</code> have <code>GNU_STACK</code> as <code>RW-</code>. When auditing a binary for exploitability, check this header first.
+  </div>
+
+  <h2>PE Format</h2>
+  <div class="format-grid">
+    <div class="format-col">
+      <h4>ELF Structure</h4>
+      <ul>
+        <li>ELF Header (64 bytes)</li>
+        <li>Program Header Table (segments)</li>
+        <li>Section content</li>
+        <li>Section Header Table</li>
+        <li>Sections identified by name (.text, .data…)</li>
+      </ul>
+    </div>
+    <div class="format-col">
+      <h4>PE Structure</h4>
+      <ul>
+        <li>DOS Header (64 bytes) + DOS stub</li>
+        <li>PE Signature "PE\0\0"</li>
+        <li>COFF Header (machine, section count)</li>
+        <li>Optional Header (entry point, image base, data dirs)</li>
+        <li>Section Table</li>
+        <li>Section content</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>PE Key Addresses</h3>
+  <table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>ImageBase</td><td>Preferred load address (0x400000 for EXE, 0x180000000 for DLL)</td></tr>
+    <tr><td>RVA (Relative Virtual Address)</td><td>Offset from ImageBase. VA = ImageBase + RVA</td></tr>
+    <tr><td>File offset</td><td>Byte position in the PE file on disk</td></tr>
+    <tr><td>VA (Virtual Address)</td><td>Address in the process's virtual address space</td></tr>
+  </table>
+
+  <h3>Data Directories</h3>
+  <p>The Optional Header contains 16 data directory entries, each with an RVA and size. Critical ones for security analysis:</p>
+  <table>
+    <tr><th>Index</th><th>Name</th><th>Security relevance</th></tr>
+    <tr><td>0</td><td>Export Table</td><td>Functions exported by DLLs; target of DLL hijacking</td></tr>
+    <tr><td>1</td><td>Import Table</td><td>Functions imported from other DLLs; target of IAT hooking</td></tr>
+    <tr><td>5</td><td>Base Relocation</td><td>ASLR patch table — if missing, no ASLR</td></tr>
+    <tr><td>9</td><td>TLS Table</td><td>Thread-local storage callbacks; execute before main() — abused by packers</td></tr>
+    <tr><td>12</td><td>IAT</td><td>Import Address Table — patched by loader/hookers</td></tr>
+  </table>
+
+  <div class="callout danger">
+    <div class="label">Parser Security — Bounds Check Everything</div>
+    Both <code>elf_reader.c</code> and <code>pe_reader.c</code> in this module omit bounds checks on offsets for readability. A production binary parser must validate every field before dereferencing: <code>e_shoff + e_shnum * e_shentsize &lt;= filesize</code>, <code>sh_offset + sh_size &lt;= filesize</code>, etc. Malformed files fed to unchecked parsers have produced dozens of CVEs in tools like <code>binutils</code>, <code>file</code>, and antivirus engines. Adding bounds checks to both readers is exercise 2 below.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_14 &amp;&amp; make<br/>
+    <span class="prompt">$ </span>./elf_reader ./elf_reader<br/>
+    <span class="out">╔═══════════════════════════════════════════════════╗
+║                   ELF HEADER                      ║
+╚═══════════════════════════════════════════════════╝
+  Magic:       7F 45 4C 46
+  Class:       ELF64
+  Data:        Little-endian (2's complement)
+  Type:        EXEC (executable)
+  Entry point: 0x401080
+  PHoff:       0x40  (13 program headers, 56 bytes each)
+  SHoff:       0x4488  (31 section headers, 64 bytes each)
+  SHstrndx:    30
+...
+  IDX  Name                  Type          Address            Offset      Size
+  -----------------------------------------------------------------------
+  0    (none)                NULL          0x0000000000000000  0x0         0
+  1    .interp               PROGBITS      0x0000000000400318  0x318       28
+  2    .note.gnu.build-id    NOTE          0x0000000000400338  0x338       32
+  ...
+  13   .text                 PROGBITS      0x0000000000401080  0x1080      3456
+  ...
+  26   .data                 PROGBITS      0x0000000000404040  0x3040      16
+  27   .bss                  NOBITS (.bss) 0x0000000000404050  0x3050      0</span>
+  </div>
+
+  <div class="shell">
+    <span class="comment"># On Windows (MSYS2):</span><br/>
+    <span class="prompt">$ </span>./pe_reader.exe /c/Windows/System32/notepad.exe<br/>
+    <span class="out">╔═══════════════════════════════════════════════════╗
+║                  DOS HEADER                       ║
+╚═══════════════════════════════════════════════════╝
+  MZ Magic:    0x5A4D
+  e_lfanew:    0xE8
+...
+  AddressOfEntryPoint:  0x1A540  (RVA)
+  ImageBase:            0x140000000
+  SectionAlignment:     0x1000
+  FileAlignment:        0x200
+...
+  Name        VirtSize    VirtAddr    RawOffset     RawSize     Flags
+  .text       0x00019D40  0x00001000  0x00000400    0x00019E00   CODE  EXECUTE  READ
+  .data       0x00000220  0x0001B000  0x00019E00    0x00000400   IDATA  READ  WRITE
+  .rsrc       0x0001B590  0x0001C000  0x0001A200    0x0001B600   READ</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Map file offset to section name</h4>
+    <p>Extend <code>elf_reader.c</code> with a function <code>const char *section_at_offset(uint8_t *buf, Elf64_Ehdr *eh, uint64_t file_offset)</code> that returns the name of the section containing a given file offset. Test it by passing the file offset of the entry point instruction: compute <code>entry_point_va - text_section_sh_addr + text_section_sh_offset</code>. This is the operation disassemblers perform to map virtual addresses to file content.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Add bounds checking to both parsers</h4>
+    <p>Add a helper <code>static int check_range(long fsize, uint64_t off, uint64_t size)</code> that returns 0 if <code>off + size &gt; (uint64_t)fsize</code>. Call it before every pointer cast in both readers. If a check fails, print an error and exit. Test with a truncated binary: <code>dd if=./elf_reader of=./truncated bs=1 count=128</code>. The readers should now exit cleanly with an error rather than segfaulting or reading garbage.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. Locate and dump the .text section bytes</h4>
+    <p>In <code>elf_reader.c</code>, after printing all section headers, find the <code>.text</code> section, use <code>sh_offset</code> and <code>sh_size</code> to locate its bytes in the buffer, and print the first 64 bytes as hex (8 bytes per row). Verify by comparing against <code>objdump -d ./elf_reader | head -20</code>. You have just implemented the core of a hex dump tool identical to how Ghidra and IDA load binary content.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_15/tutorial.html" style="color:inherit;">What's Next — Module 15: System Calls &amp; Direct OS Interaction</a></h2>
+    <p>Module 15 removes the C library entirely and calls the OS kernel directly via the <code>syscall</code> instruction on Linux and <code>int 0x2E</code> / <code>syscall</code> on Windows. You will implement <code>write</code>, <code>read</code>, <code>open</code>, <code>mmap</code>, <code>exit</code>, and <code>brk</code> in pure assembly with zero libc dependency. On Windows you will call <code>NtWriteFile</code> directly through the Native API. This is the skill that makes shellcode possible.</p>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 08 — Procedures, Recursion & the Red Zone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}a{color:var(--cyan);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 08 of 21 &mdash; Core Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Procedures, Recursion &amp; the Red Zone</h1>
+  <p class="subtitle">Callee-saved registers, recursive assembly functions, the 128-byte red zone, tail-call optimisation, and returning multiple values — the complete procedure toolkit.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Modules 01–07: stack mechanics fully understood, call/ret internals clear, local variable layout memorised.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>procs.asm</code> — recursive fibonacci and factorial, a tail-call optimised summation, a red-zone leaf function, and a two-value return via rax/rdx</li>
+    <li>Mastery of which registers you must preserve and how to do it correctly</li>
+    <li>Understanding of the red zone — what it is, when to use it, and why it doesn't exist on Windows</li>
+  </ul></div>
+
+  <h2>Caller-Saved vs Callee-Saved Registers</h2>
+  <p>The ABI divides the 16 general-purpose registers into two groups based on who is responsible for preserving their values across a function call.</p>
+
+  <table>
+    <tr><th>Type</th><th>Registers (Linux/macOS)</th><th>Rule</th></tr>
+    <tr><td>Caller-saved</td><td><code>rax rcx rdx rsi rdi r8 r9 r10 r11</code></td><td>May be destroyed by any function you call. Save them yourself before calling if you need them afterward.</td></tr>
+    <tr><td>Callee-saved</td><td><code>rbx rbp r12 r13 r14 r15</code></td><td>Must be preserved by any function that uses them. Push at entry, pop before ret.</td></tr>
+  </table>
+
+  <p>The split is designed so that simple functions can use caller-saved registers freely without any save/restore overhead, while callee-saved registers provide a stable set of "working registers" across calls. If a function needs a value to survive across multiple nested calls, it stores that value in a callee-saved register.</p>
+
+  <pre><code><span class="comment">; Correct use of callee-saved r12 in a function:</span>
+<span class="lbl">my_func:</span>
+    <span class="kw">push</span> <span class="reg">rbp</span>
+    <span class="kw">mov</span>  <span class="reg">rbp</span>, <span class="reg">rsp</span>
+    <span class="kw">push</span> <span class="reg">r12</span>          <span class="comment">; ← save r12 before using it</span>
+    <span class="kw">push</span> <span class="reg">rbx</span>          <span class="comment">; ← save rbx before using it</span>
+
+    <span class="kw">mov</span>  <span class="reg">r12</span>, <span class="reg">rdi</span>     <span class="comment">; store first arg in r12 (survives calls)</span>
+    <span class="kw">call</span> <span class="lbl">something</span>    <span class="comment">; rdi/rsi/rax may be destroyed — r12 is safe</span>
+    <span class="kw">add</span>  <span class="reg">rax</span>, <span class="reg">r12</span>     <span class="comment">; use r12 after the call</span>
+
+    <span class="kw">pop</span>  <span class="reg">rbx</span>          <span class="comment">; ← restore in reverse order</span>
+    <span class="kw">pop</span>  <span class="reg">r12</span>          <span class="comment">; ← restore r12</span>
+    <span class="kw">pop</span>  <span class="reg">rbp</span>
+    <span class="kw">ret</span></code></pre>
+
+  <div class="callout danger">
+    <div class="label">Pop in Reverse Order</div>
+    Push and pop use the same stack pointer. If you push r12 then rbx, you must pop rbx then r12 — in reverse order. Getting this wrong silently corrupts register values and produces impossible-to-debug behaviour. Always match your pushes and pops like parentheses.
+  </div>
+
+  <h2>Recursive Functions in Assembly</h2>
+  <p>Recursion in assembly works the same as in any language — each call gets its own stack frame with its own copy of local variables. The key challenge is that arguments passed in registers (like <code>rdi</code>) will be overwritten by the recursive call. You must save them to callee-saved registers or to the stack first.</p>
+
+  <pre><code><span class="comment">; fibonacci(n) — n arrives in rdi</span>
+<span class="lbl">fibonacci:</span>
+    <span class="kw">push</span> <span class="reg">rbp</span>
+    <span class="kw">mov</span>  <span class="reg">rbp</span>, <span class="reg">rsp</span>
+    <span class="kw">push</span> <span class="reg">r12</span>           <span class="comment">; callee-saved: will survive the recursive calls</span>
+    <span class="kw">push</span> <span class="reg">rbx</span>           <span class="comment">; callee-saved: will hold fib(n-1)</span>
+
+    <span class="kw">mov</span>  <span class="reg">r12</span>, <span class="reg">rdi</span>      <span class="comment">; r12 = n  (safe across calls)</span>
+
+    <span class="kw">cmp</span>  <span class="reg">r12</span>, <span class="num">1</span>
+    <span class="kw">jle</span>  <span class="lbl">.base</span>         <span class="comment">; fib(0)=0, fib(1)=1</span>
+
+    <span class="kw">lea</span>  <span class="reg">rdi</span>, [<span class="reg">r12</span>-<span class="num">1</span>]  <span class="comment">; arg = n-1</span>
+    <span class="kw">call</span> <span class="lbl">fibonacci</span>
+    <span class="kw">mov</span>  <span class="reg">rbx</span>, <span class="reg">rax</span>      <span class="comment">; rbx = fib(n-1)  (r12 still holds n)</span>
+
+    <span class="kw">lea</span>  <span class="reg">rdi</span>, [<span class="reg">r12</span>-<span class="num">2</span>]  <span class="comment">; arg = n-2</span>
+    <span class="kw">call</span> <span class="lbl">fibonacci</span>     <span class="comment">; rax = fib(n-2)</span>
+    <span class="kw">add</span>  <span class="reg">rax</span>, <span class="reg">rbx</span>      <span class="comment">; rax = fib(n-1) + fib(n-2)</span>
+    <span class="kw">jmp</span>  <span class="lbl">.done</span>
+
+<span class="lbl">.base:</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="reg">r12</span>      <span class="comment">; return n (0 or 1)</span>
+<span class="lbl">.done:</span>
+    <span class="kw">pop</span>  <span class="reg">rbx</span>
+    <span class="kw">pop</span>  <span class="reg">r12</span>
+    <span class="kw">pop</span>  <span class="reg">rbp</span>
+    <span class="kw">ret</span></code></pre>
+
+  <h2>Tail-Call Optimisation</h2>
+  <p>A <strong>tail call</strong> is a recursive call that is the <em>last thing the function does</em> — the return value of the recursive call is returned unchanged. In this case, the current stack frame is no longer needed when the recursive call executes. Instead of <code>call + ret</code> (which would add a new frame), you can <code>jmp</code> back to the start of the function, reusing the existing frame. This reduces stack usage from O(n) to O(1).</p>
+
+  <pre><code><span class="comment">; Tail-recursive sum: sum_to(n, acc) = sum_to(n-1, acc+n)  if n>0</span>
+<span class="comment">;                                     = acc                   if n==0</span>
+<span class="lbl">sum_to_tail:</span>
+    <span class="comment">; rdi=n, rsi=acc — no prologue needed for a tail-only function</span>
+    <span class="kw">test</span> <span class="reg">rdi</span>, <span class="reg">rdi</span>
+    <span class="kw">jz</span>   <span class="lbl">.done</span>         <span class="comment">; n==0: return acc</span>
+    <span class="kw">add</span>  <span class="reg">rsi</span>, <span class="reg">rdi</span>      <span class="comment">; acc += n</span>
+    <span class="kw">dec</span>  <span class="reg">rdi</span>           <span class="comment">; n--</span>
+    <span class="kw">jmp</span>  <span class="lbl">sum_to_tail</span>   <span class="comment">; ← JMP not CALL: no new frame, O(1) stack</span>
+<span class="lbl">.done:</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="reg">rsi</span>
+    <span class="kw">ret</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Insight — Tail Calls in Disassembly</div>
+    When reversing a binary, a function that ends with <code>jmp other_function</code> instead of <code>call other_function; ret</code> is performing a tail call. The called function will execute and its <code>ret</code> will return directly to the <em>original</em> caller — skipping the current function entirely. This is important when tracing control flow in IDA or Ghidra: a <code>jmp</code> at the end of a function is not necessarily an unconditional branch to local code — it may be a tail call to another function.
+  </div>
+
+  <h2>The Red Zone</h2>
+  <p>The System V AMD64 ABI (Linux/macOS) defines a <strong>red zone</strong>: the 128 bytes immediately below <code>rsp</code> (addresses <code>[rsp-1]</code> through <code>[rsp-128]</code>) that <strong>leaf functions</strong> (functions that make no further calls) may use as scratch space without adjusting <code>rsp</code>. The ABI guarantees that signal handlers will not use this area.</p>
+
+  <pre><code><span class="comment">; Leaf function using the red zone — no sub rsp needed</span>
+<span class="lbl">fast_leaf:</span>
+    <span class="comment">; No prologue, no sub rsp</span>
+    <span class="kw">mov</span>  <span class="kw">qword</span> [<span class="reg">rsp</span>-<span class="num">8</span>],  <span class="num">0x1111</span>   <span class="comment">; local variable 1 in red zone</span>
+    <span class="kw">mov</span>  <span class="kw">qword</span> [<span class="reg">rsp</span>-<span class="num">16</span>], <span class="num">0x2222</span>   <span class="comment">; local variable 2 in red zone</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, [<span class="reg">rsp</span>-<span class="num">8</span>]
+    <span class="kw">add</span>  <span class="reg">rax</span>, [<span class="reg">rsp</span>-<span class="num">16</span>]
+    <span class="kw">ret</span>                              <span class="comment">; rsp never changed</span></code></pre>
+
+  <div class="callout warn">
+    <div class="label">Red Zone Does NOT Exist on Windows</div>
+    The Microsoft x64 ABI has no red zone. Code that uses <code>[rsp-N]</code> without adjusting <code>rsp</code> will be silently corrupted by hardware interrupts and OS callbacks on Windows. This is a common porting bug when moving Linux assembly to Windows. Always use <code>sub rsp, N</code> before using local storage when writing cross-platform code.
+  </div>
+
+  <h2>Returning Multiple Values</h2>
+  <p>The ABI allows functions to return up to two 64-bit values: the first in <code>rax</code>, the second in <code>rdx</code>. This is used for 128-bit integers and for functions that naturally produce two results (like division).</p>
+  <pre><code><span class="lbl">divmod:</span>               <span class="comment">; returns: rax=quotient, rdx=remainder</span>
+    <span class="kw">mov</span>  <span class="reg">rax</span>, <span class="reg">rdi</span>   <span class="comment">; dividend</span>
+    <span class="kw">xor</span>  <span class="reg">rdx</span>, <span class="reg">rdx</span>   <span class="comment">; zero upper half</span>
+    <span class="kw">div</span>  <span class="reg">rsi</span>        <span class="comment">; rax=quotient, rdx=remainder — two values for free</span>
+    <span class="kw">ret</span></code></pre>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_08 &amp;&amp; make &amp;&amp; ./procs<br/>
+    <span class="out">=== callee-saved registers: rbx r12-r15 ===<br/>
+  3149642683 (0xBBBBBBBB)   ← rbx still intact after fibonacci call<br/>
+  303174162 (0x12121212)    ← r12 still intact<br/>
+=== recursive fibonacci(10) ===<br/>
+  55 (0x37)<br/>
+=== recursive factorial(12) ===<br/>
+  479001600 (0x1C8CFC00)<br/>
+=== tail-call optimisation: jmp not call ===<br/>
+  5050 (0x13BA)<br/>
+=== red zone demo (leaf function, no sub rsp) ===<br/>
+  0xAAAA0006 (2863333382)<br/>
+=== multiple return values via rdx ===<br/>
+  14 (0xE)    ← quotient<br/>
+  2 (0x2)     ← remainder</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Trace fibonacci(5) by hand</h4>
+    <p>Draw the call tree for <code>fibonacci(5)</code> on paper. Count how many total calls are made. Then set a breakpoint on the first instruction of <code>fibonacci</code> and use GDB's <code>commands</code> feature to print a counter each time it fires: <code>break fibonacci</code>, <code>commands</code>, <code>silent</code>, <code>set $count=$count+1</code>, <code>printf "call #%d\n",$count</code>, <code>continue</code>, <code>end</code>. Does the count match your tree?</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Corrupt a callee-saved register deliberately</h4>
+    <p>Modify <code>fibonacci</code> to use <code>r12</code> but NOT save/restore it (remove the <code>push r12</code> / <code>pop r12</code> pair). Set <code>r12 = 0x12121212</code> in <code>main</code> before calling <code>fibonacci</code>. After the call, print <code>r12</code>. Is it still <code>0x12121212</code>? This demonstrates what "callee-saved" means when violated — a category of real bugs.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. Convert recursive fibonacci to memoised</h4>
+    <p>Add a 100-element array in <code>.bss</code> as a memo table. Before computing <code>fibonacci(n)</code>, check if the result is already stored. If yes, return it immediately. If no, compute it, store it, then return. This changes the complexity from O(2ⁿ) to O(n). Verify <code>fibonacci(40)</code> returns instantly.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. Implement Ackermann(3, 6) with tail-call where possible</h4>
+    <p>The Ackermann function is deeply recursive. Implement it and observe the stack depth in GDB. Use <code>info frame</code> to find the call depth. Then add a counter (a global in <code>.bss</code>) that increments on every call and print it at the end. Compare the call count for <code>Ackermann(3,4)</code> vs <code>Ackermann(3,5)</code>.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_09/tutorial.html" style="color:inherit;">What's Next — Module 09: Calling Conventions &amp; the ABI</a></h2>
+    <p>Modules 07–08 used a shortcut: setting both <code>rdi/rsi</code> (Linux) and <code>rcx/rdx</code> (Windows) before every call. Module 09 makes this rigorous: the System V AMD64 ABI and Microsoft x64 ABI side by side, all six argument registers for each platform, the Windows 32-byte shadow space, floating-point args in <code>xmm0–xmm7</code>, how the ABI handles structs, and variadic functions. The new file is <code>abi.asm</code>, which calls a C function with 7 arguments so one argument lands on the stack — exposing the exact ABI mechanics.</p>
+  </div>
+</div>
+</body>
+</html>

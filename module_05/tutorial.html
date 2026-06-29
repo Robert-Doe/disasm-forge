@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 05 — Bitwise Operations & Bit Manipulation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}a{color:var(--cyan);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.reg{color:var(--purple);}.num{color:var(--orange);}.lbl{color:var(--gold);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:14px;margin:16px 0;}
+  .shell .prompt{color:var(--teal);user-select:none;}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}td code{border:none;background:none;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+  .truth-table{display:grid;grid-template-columns:repeat(4,auto);gap:0;width:fit-content;margin:16px 0;border:1px solid var(--border);border-radius:6px;overflow:hidden;}
+  .tt-cell{padding:8px 20px;font-family:'Source Code Pro',monospace;font-size:14px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .tt-cell:last-child,.tt-cell:nth-child(4n){border-right:none;}
+  .tt-head{background:var(--bg3);color:var(--cyan);}
+  .tt-one{color:var(--green);}.tt-zero{color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 05 of 21 &mdash; Core Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Bitwise Operations &amp; Bit Manipulation</h1>
+  <p class="subtitle">AND, OR, XOR, NOT, all shifts, rotates, bit-test instructions, POPCNT — plus the security patterns that show up in every exploit, crypto implementation, and OS kernel.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; Modules 01–04: registers, data directives, two's complement, arithmetic flags all solid.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>bits.asm</code> — exercises every bitwise instruction with live output showing input and result</li>
+    <li>Mastery of logical ops, shift vs arithmetic-shift, rotate-through-carry, bit-test-and-modify, BSF/BSR, POPCNT/TZCNT/LZCNT</li>
+    <li>Four practical security patterns: mask, nibble extraction, fast power-of-two divide, power-of-two test</li>
+  </ul></div>
+
+  <h2>Why Bitwise Operations Are a Security Fundamental</h2>
+  <p>Every low-level security primitive relies on bitwise operations. Stream cipher keystreams are XORed with plaintext. Hash functions use rotates, shifts, and XORs. Permission bits in page table entries are set and cleared with AND and OR. CPU feature flags (from CPUID) are extracted with AND and shift. Shellcode is often XOR-encoded to avoid null bytes. Exploit mitigations like ASLR add entropy using bit shifts. Understanding these operations at the instruction level means you can read crypto implementations, understand hardware interfaces, and see through obfuscation.</p>
+
+  <h2>The Four Logical Operations</h2>
+  <div class="truth-table">
+    <div class="tt-cell tt-head">A</div><div class="tt-cell tt-head">B</div><div class="tt-cell tt-head">A AND B</div><div class="tt-cell tt-head">A OR B</div>
+    <div class="tt-cell tt-zero">0</div><div class="tt-cell tt-zero">0</div><div class="tt-cell tt-zero">0</div><div class="tt-cell tt-zero">0</div>
+    <div class="tt-cell tt-zero">0</div><div class="tt-cell tt-one">1</div><div class="tt-cell tt-zero">0</div><div class="tt-cell tt-one">1</div>
+    <div class="tt-cell tt-one">1</div><div class="tt-cell tt-zero">0</div><div class="tt-cell tt-zero">0</div><div class="tt-cell tt-one">1</div>
+    <div class="tt-cell tt-one">1</div><div class="tt-cell tt-one">1</div><div class="tt-cell tt-one">1</div><div class="tt-cell tt-one">1</div>
+  </div>
+
+  <table>
+    <tr><th>Instruction</th><th>Bit rule</th><th>Common use</th></tr>
+    <tr><td><code>and rax, mask</code></td><td>1 only if both bits are 1</td><td>Isolate bits, clear bits, test membership</td></tr>
+    <tr><td><code>or  rax, bits</code></td><td>1 if either bit is 1</td><td>Set specific bits, combine flags</td></tr>
+    <tr><td><code>xor rax, bits</code></td><td>1 if bits differ</td><td>Toggle bits, zero a register, XOR cipher</td></tr>
+    <tr><td><code>not rax</code></td><td>Flip every bit</td><td>Bitwise complement, create masks</td></tr>
+  </table>
+
+  <pre><code><span class="comment">; AND: masking — keep only bits you want</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0xFF</span>
+<span class="kw">and</span>  <span class="reg">rax</span>, <span class="num">0x0F</span>     <span class="comment">; 0xFF & 0x0F = 0x0F  (keep lower nibble, clear upper)</span>
+
+<span class="comment">; OR: setting bits</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0x00</span>
+<span class="kw">or</span>   <span class="reg">rax</span>, <span class="num">0x80</span>     <span class="comment">; set bit 7 → rax = 0x80</span>
+
+<span class="comment">; XOR: toggle bits  (XOR with 1 flips; XOR with 0 preserves)</span>
+<span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">0b10110011</span>
+<span class="kw">xor</span>  <span class="reg">rax</span>, <span class="num">0b00001111</span>  <span class="comment">; flip lower nibble → 0b10111100</span>
+
+<span class="comment">; XOR zeroing idiom: xor eax,eax  (2 bytes — canonical way to zero rax)</span>
+<span class="kw">xor</span>  <span class="reg">eax</span>, <span class="reg">eax</span>        <span class="comment">; rax = 0</span></code></pre>
+
+  <h2>Shifts: Moving Bits Left and Right</h2>
+  <p>Shifts move all bits in a register a specified number of positions. The vacated positions are filled with either 0 or the sign bit. The bit that falls off the end goes into CF.</p>
+
+  <table>
+    <tr><th>Instruction</th><th>Fill vacated bits with</th><th>Use case</th></tr>
+    <tr><td><code>shl rax, N</code></td><td>0 on right</td><td>Multiply by 2ᴺ (unsigned/signed)</td></tr>
+    <tr><td><code>shr rax, N</code></td><td>0 on left</td><td>Divide by 2ᴺ (unsigned only)</td></tr>
+    <tr><td><code>sar rax, N</code></td><td>Sign bit on left</td><td>Divide by 2ᴺ (signed — preserves negativity)</td></tr>
+  </table>
+
+  <div class="callout danger">
+    <div class="label">Critical Distinction: SHR vs SAR on Negative Numbers</div>
+    <pre style="margin:8px 0 0;background:transparent;border:none;padding:0;"><code><span class="kw">mov</span>  <span class="reg">rax</span>, <span class="num">-128</span>     <span class="comment">; 0xFFFFFFFFFFFFFF80</span>
+<span class="kw">sar</span>  <span class="reg">rax</span>, <span class="num">3</span>        <span class="comment">; = -16   fills with 1s (sign bit) → 0xFFFFFFFFFFFFFFF0</span>
+<span class="kw">shr</span>  <span class="reg">rax</span>, <span class="num">3</span>        <span class="comment">; = 2305843009213693936  fills with 0s → 0x1FFFFFFFFFFFFFF0</span></code></pre>
+    If you use <code>shr</code> on a signed value, you get a large positive number instead of the expected negative result. In disassembly, seeing <code>sar</code> tells you the value is treated as signed; <code>shr</code> tells you it is unsigned.
+  </div>
+
+  <h2>Rotates: Circular Shifts</h2>
+  <p>Unlike shifts, rotates do not discard the bits that fall off the edge — they wrap around to the other side. <code>rol</code> (rotate left) and <code>ror</code> (rotate right) are heavily used in cryptographic hash functions (SHA-256, ChaCha20).</p>
+  <pre><code><span class="kw">rol</span>  <span class="reg">rax</span>, <span class="num">1</span>   <span class="comment">; bit 63 → bit 0, all others shift left by 1</span>
+<span class="kw">ror</span>  <span class="reg">rax</span>, <span class="num">1</span>   <span class="comment">; bit 0 → bit 63, all others shift right by 1</span>
+
+<span class="comment">; rcl/rcr: rotate THROUGH the carry flag (CF participates as an extra bit)</span>
+<span class="kw">rcl</span>  <span class="reg">rax</span>, <span class="num">1</span>   <span class="comment">; bit 63 → CF, old CF → bit 0</span>
+<span class="kw">rcr</span>  <span class="reg">rax</span>, <span class="num">1</span>   <span class="comment">; bit 0 → CF, old CF → bit 63</span></code></pre>
+
+  <h2>Bit Test Instructions</h2>
+  <p>These instructions test a single bit and optionally modify it, copying the original bit value to CF. They are used constantly in OS code for manipulating hardware register fields and page table entries.</p>
+  <pre><code><span class="kw">bt</span>   <span class="reg">rax</span>, <span class="num">5</span>   <span class="comment">; test bit 5 of rax → CF = value of bit 5 (rax unchanged)</span>
+<span class="kw">bts</span>  <span class="reg">rax</span>, <span class="num">5</span>   <span class="comment">; test bit 5, then SET it to 1 → CF = old value</span>
+<span class="kw">btr</span>  <span class="reg">rax</span>, <span class="num">5</span>   <span class="comment">; test bit 5, then RESET (clear) it → CF = old value</span>
+<span class="kw">btc</span>  <span class="reg">rax</span>, <span class="num">5</span>   <span class="comment">; test bit 5, then COMPLEMENT (toggle) it → CF = old value</span></code></pre>
+
+  <h2>Bit Scan: Finding the First Set Bit</h2>
+  <pre><code><span class="kw">bsf</span>  <span class="reg">rbx</span>, <span class="reg">rax</span>   <span class="comment">; Bit Scan Forward: rbx = index of lowest set bit in rax</span>
+<span class="kw">bsr</span>  <span class="reg">rbx</span>, <span class="reg">rax</span>   <span class="comment">; Bit Scan Reverse: rbx = index of highest set bit in rax</span>
+<span class="comment">; WARNING: if rax = 0, result is UNDEFINED and ZF=1</span></code></pre>
+
+  <h2>Advanced Bit Instructions (BMI)</h2>
+  <pre><code><span class="kw">popcnt</span> <span class="reg">rbx</span>, <span class="reg">rax</span>  <span class="comment">; rbx = number of 1-bits in rax (population count)</span>
+<span class="kw">tzcnt</span>  <span class="reg">rbx</span>, <span class="reg">rax</span>  <span class="comment">; rbx = number of trailing zeros (lowest N bits are 0)</span>
+<span class="kw">lzcnt</span>  <span class="reg">rbx</span>, <span class="reg">rax</span>  <span class="comment">; rbx = number of leading zeros</span></code></pre>
+
+  <div class="callout insight">
+    <div class="label">Security Use — POPCNT in Crypto</div>
+    <code>popcnt</code> appears in implementations of Hamming weight (number of differing bits between two values), which is used in error-correcting codes and in measuring cryptographic distance. It also appears in timing-attack-resistant code where branch-free implementations use <code>popcnt</code> to avoid conditional branches that leak secret data through timing.
+  </div>
+
+  <h2>Practical Security Bit Patterns</h2>
+  <pre><code><span class="comment">; 1. Extract lower nibble (bits 3:0) from a byte</span>
+<span class="kw">and</span>  <span class="reg">rax</span>, <span class="num">0x0F</span>             <span class="comment">; mask all but lower 4 bits</span>
+
+<span class="comment">; 2. Extract upper nibble (bits 7:4) from a byte</span>
+<span class="kw">shr</span>  <span class="reg">rax</span>, <span class="num">4</span>                <span class="comment">; shift upper nibble to position 0</span>
+
+<span class="comment">; 3. Fast unsigned divide by power of two</span>
+<span class="kw">shr</span>  <span class="reg">rax</span>, <span class="num">3</span>                <span class="comment">; rax / 8  (3 = log2(8))</span>
+
+<span class="comment">; 4. Test if N is a power of two: (N & (N-1)) == 0</span>
+<span class="kw">mov</span>  <span class="reg">rbx</span>, <span class="reg">rax</span>
+<span class="kw">dec</span>  <span class="reg">rbx</span>
+<span class="kw">and</span>  <span class="reg">rbx</span>, <span class="reg">rax</span>              <span class="comment">; if result == 0, rax is a power of two</span>
+
+<span class="comment">; 5. Set bit N: use OR with a shifted 1</span>
+<span class="kw">mov</span>  <span class="reg">rcx</span>, <span class="num">5</span>               <span class="comment">; bit position</span>
+<span class="kw">mov</span>  <span class="reg">rbx</span>, <span class="num">1</span>
+<span class="kw">shl</span>  <span class="reg">rbx</span>, <span class="kw">cl</span>              <span class="comment">; cl = low 8 bits of rcx — shift amount</span>
+<span class="kw">or</span>   <span class="reg">rax</span>, <span class="reg">rbx</span>             <span class="comment">; set bit 5</span></code></pre>
+
+  <div class="callout tip">
+    <div class="label">Tip — cl for Variable Shift Count</div>
+    When the shift count is stored in a register (not known at assembly time), you must use the <code>cl</code> register (the low byte of <code>rcx</code>) as the shift operand. You cannot use <code>shl rax, rbx</code> — the architecture only allows <code>cl</code> or an immediate. This is why compilers move variable shift amounts into <code>rcx</code> before shifting.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_05 &amp;&amp; make &amp;&amp; ./bits<br/>
+    <span class="out">=== and / or / xor / not ===<br/>
+  0x0F000F000F000F00  (1080863910568919808)<br/>
+  0xFF000000000000FF  (18374686479671623935)<br/>
+  0x0000000000000000  (0)<br/>
+  0x00000000000000BC  (188)<br/>
+  0xFF00FF00FF00FF00  (18374966859414961920)<br/>
+=== shl / shr / sar / rol / ror ===<br/>
+  0x0000000000000400  (1024)<br/>
+  0x0000000000000080  (128)<br/>
+  0xFFFFFFFFFFFFFFF0  (18446744073709551600)<br/>
+  0x1FFFFFFFFFFFFFF0  (2305843009213693936)</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Bit manipulation by hand</h4>
+    <p>Without running the code, compute: (a) <code>0xABCD & 0x0F0F</code>, (b) <code>0x1234 | 0x8000</code>, (c) <code>0xFF ^ 0xAA</code>. Then add each to <code>bits.asm</code> and verify your answers.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Extract all four bytes from a 32-bit value</h4>
+    <p>Given <code>rax = 0x12345678</code>, use shifts and masks to extract each byte (0x12, 0x34, 0x56, 0x78) into separate registers and print them. This is the kind of operation used in network packet parsing.</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>3. Implement a byte swap (bswap)</h4>
+    <p>x86-64 has a <code>bswap rax</code> instruction that reverses the byte order. First implement byte-swap manually using shifts and ORs, then replace it with <code>bswap</code> and confirm the output is identical. <code>bswap</code> is used for network-to-host byte order conversion.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>4. Branchless absolute value</h4>
+    <p>Compute the absolute value of a signed integer without using any jump instructions. Hint: arithmetic right shift by 63 produces either all-zeros (positive) or all-ones (negative). Use that mask with XOR and subtraction. This technique appears in constant-time cryptographic code.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_06/tutorial.html" style="color:inherit;">What's Next — Module 06: Control Flow</a></h2>
+    <p>Module 06 puts the flags register to work: all 16 conditional jump mnemonics, the difference between signed and unsigned comparisons, <code>cmp</code> vs <code>test</code>, and how to translate <code>if/else if/else</code>, <code>while</code>, <code>for</code>, and <code>switch</code> statements into assembly. The new file is <code>control.asm</code>, which builds a 5-case jump table — the fastest form of switch dispatch — so you can see how compilers implement it in disassembly.</p>
+  </div>
+</div>
+</body>
+</html>

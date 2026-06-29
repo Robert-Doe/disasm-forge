@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Module 17 — Inline Assembly & Reading Compiler Output</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Lato:wght@300;400;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet"/>
+<style>
+  :root{--bg:#0b0f1a;--bg2:#111827;--bg3:#1a2235;--card:#141c2e;--border:#1e3a5f;--gold:#f5c842;--cyan:#38bdf8;--purple:#a78bfa;--red:#f87171;--green:#4ade80;--teal:#0d9488;--orange:#fb923c;--text:#e2e8f0;--muted:#7a9bbf;--code-bg:#060d1a;}
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;font-size:17px;line-height:1.8;padding:0 0 80px;}
+  .hero{background:linear-gradient(160deg,var(--bg2) 0%,var(--bg3) 100%);border-bottom:1px solid var(--border);padding:60px 40px 50px;max-width:900px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--border);color:var(--cyan);font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:2px;padding:4px 14px;border-radius:20px;margin-bottom:24px;text-transform:uppercase;}
+  h1{font-family:'Playfair Display',serif;font-size:2.8rem;color:var(--gold);line-height:1.2;margin-bottom:16px;}
+  .subtitle{color:var(--muted);font-size:1.1rem;font-weight:300;max-width:640px;}
+  .content{max-width:900px;margin:0 auto;padding:0 40px;}
+  .prereq{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--teal);border-radius:8px;padding:20px 24px;margin:40px 0 0;}
+  .prereq strong{color:var(--teal);}
+  h2{font-family:'Playfair Display',serif;font-size:1.8rem;color:var(--cyan);margin:56px 0 20px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+  h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--purple);margin:36px 0 14px;}
+  p{margin-bottom:16px;}ul,ol{margin:12px 0 20px 28px;}li{margin-bottom:8px;}
+  strong{color:var(--orange);}
+  pre{background:var(--code-bg);border:1px solid var(--border);border-radius:8px;padding:24px;overflow-x:auto;margin:20px 0;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.7;}
+  code{font-family:'Source Code Pro',monospace;font-size:.9em;background:var(--code-bg);border:1px solid var(--border);border-radius:4px;padding:2px 7px;color:var(--green);}
+  pre code{background:none;border:none;padding:0;font-size:inherit;color:var(--text);}
+  .comment{color:var(--muted);font-style:italic;}.kw{color:var(--cyan);}.num{color:var(--orange);}
+  .callout{border-radius:8px;padding:18px 22px;margin:28px 0;border-left:4px solid;}
+  .callout.tip{background:#0d1f1a;border-color:var(--green);}
+  .callout.warn{background:#1f1408;border-color:var(--orange);}
+  .callout.insight{background:#120d1f;border-color:var(--purple);}
+  .callout.danger{background:#1f0d0d;border-color:var(--red);}
+  .callout .label{font-family:'Source Code Pro',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+  .callout.tip .label{color:var(--green);}.callout.warn .label{color:var(--orange);}.callout.insight .label{color:var(--purple);}.callout.danger .label{color:var(--red);}
+  table{width:100%;border-collapse:collapse;margin:20px 0;}
+  th{background:var(--bg3);color:var(--cyan);text-align:left;padding:10px 14px;border:1px solid var(--border);font-family:'Source Code Pro',monospace;font-size:13px;}
+  td{padding:10px 14px;border:1px solid var(--border);font-size:15px;}
+  tr:nth-child(even) td{background:var(--card);}
+  td code{border:none;background:none;color:var(--purple);}
+  .deliverables{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:24px 28px;margin:20px 0;}
+  .deliverables li::marker{color:var(--gold);}
+  .shell{background:#010408;border:1px solid var(--border);border-radius:8px;padding:20px 24px;font-family:'Source Code Pro',monospace;font-size:13px;margin:16px 0;line-height:1.7;}
+  .shell .prompt{color:var(--teal);}.shell .out{color:var(--muted);}
+  .exercise{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px 28px;margin:24px 0;}
+  .exercise .ex-label{font-family:'Source Code Pro',monospace;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+  .ex-warmup .ex-label{color:var(--green);}.ex-core .ex-label{color:var(--cyan);}.ex-stretch .ex-label{color:var(--orange);}
+  .exercise h4{color:var(--text);font-size:1rem;margin-bottom:8px;}
+  .cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0;}
+  .cmp-col h4{font-family:'Source Code Pro',monospace;font-size:.85rem;color:var(--muted);margin-bottom:8px;}
+  .cmp-col pre{margin:0;}
+  .constraint-table td:first-child{font-family:'Source Code Pro',monospace;color:var(--purple);}
+  .next-module{background:linear-gradient(135deg,var(--bg3),var(--card));border:1px solid var(--border);border-radius:10px;padding:30px 32px;margin-top:60px;}
+  .next-module h2{margin-top:0;border:none;padding:0;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Module 17 of 21 &mdash; Advanced Assembly</div>
+  <div class="badge"><a href="../README.md" style="color:inherit;text-decoration:none;">&larr; Course Index</a></div>
+  <h1>Inline Assembly &amp; Reading Compiler Output</h1>
+  <p class="subtitle">Two complementary skills: embedding assembly inside C with GCC's <code>asm volatile</code> constraint syntax, and reading the assembly that the compiler emits at <code>-O2</code> to recognize optimization patterns — strength reduction, <code>cmov</code>, tail-call elimination, and auto-vectorization.</p>
+</div>
+<div class="content">
+  <div class="prereq"><strong>Prerequisites</strong> &mdash; All prior modules. This module ties together instruction knowledge (Modules 04–06), ABI (Module 09), and addressing (Module 10) in a C-integrated context.</div>
+
+  <h2>What You Will Build</h2>
+  <div class="deliverables"><ul>
+    <li><code>inline_asm.c</code> — GCC extended inline assembly: <code>addq</code>, <code>mulq</code> (128-bit), <code>bswap</code>, <code>rol</code>, <code>cpuid</code>, <code>rdtsc</code>, <code>pushfq</code></li>
+    <li><code>inline_asm_O2.s</code> (generated) — compiler output to read and annotate</li>
+  </ul></div>
+
+  <h2>GCC Extended Inline Assembly Syntax</h2>
+  <pre><code>asm volatile (
+    <span class="comment">"assembly template"</span>
+    : <span class="comment">output operands</span>
+    : <span class="comment">input operands</span>
+    : <span class="comment">clobber list</span>
+);</code></pre>
+
+  <h3>The Four Parts</h3>
+  <ul>
+    <li><strong>Template</strong> — the instruction string, with operand placeholders <code>%0</code>, <code>%1</code>, …</li>
+    <li><strong>Outputs</strong> — <code>"constraint"(C_variable)</code> pairs telling the compiler where to put results. Constraints start with <code>=</code> (write-only) or <code>+</code> (read-write).</li>
+    <li><strong>Inputs</strong> — <code>"constraint"(expression)</code> pairs telling the compiler where to put arguments.</li>
+    <li><strong>Clobbers</strong> — registers and/or <code>"memory"</code> that the snippet modifies without being listed as outputs. The compiler must save/restore clobbered registers.</li>
+  </ul>
+
+  <h3>Common Constraint Letters</h3>
+  <table class="constraint-table">
+    <tr><th>Constraint</th><th>Meaning</th></tr>
+    <tr><td>"r"</td><td>Any general-purpose register</td></tr>
+    <tr><td>"a"</td><td>rax/eax/ax/al specifically</td></tr>
+    <tr><td>"d"</td><td>rdx/edx/dx/dl specifically</td></tr>
+    <tr><td>"c"</td><td>rcx/ecx/cx/cl specifically (required for shifts/rotates)</td></tr>
+    <tr><td>"m"</td><td>Memory operand (any valid addressing mode)</td></tr>
+    <tr><td>"i"</td><td>Immediate (compile-time constant)</td></tr>
+    <tr><td>"0"–"9"</td><td>Same register as the Nth output operand (tied constraint)</td></tr>
+    <tr><td>"=r"</td><td>Write-only, any register</td></tr>
+    <tr><td>"+r"</td><td>Read-write, any register</td></tr>
+  </table>
+
+  <h2>Example: 128-bit Multiply via mulq</h2>
+  <pre><code><span class="comment">/* mulq writes the full 128-bit product into rdx:rax */</span>
+static void mul_wide(uint64_t a, uint64_t b, uint64_t *hi, uint64_t *lo) {
+    uint64_t h, l;
+    asm volatile (
+        "mulq %3"
+        : "=d"(h),     <span class="comment">/* rdx → h  */</span>
+          "=a"(l)      <span class="comment">/* rax → l  */</span>
+        : "a"(a),      <span class="comment">/* rax ← a  */</span>
+          "r"(b)       <span class="comment">/* any reg ← b  */</span>
+        :
+    );
+    *hi = h;  *lo = l;
+}</code></pre>
+
+  <div class="callout tip">
+    <div class="label">Tied Constraints — "0" through "9"</div>
+    When an output and an input must use the same register (e.g. <code>add rax, rbx</code> where rax is both input and output), use a numeric constraint on the input referring to the output's position: <code>: "=r"(result) : "0"(a), "r"(b)</code>. This tells the compiler "put <code>a</code> in the same register as <code>result</code>, then the add modifies it in place."
+  </div>
+
+  <h2>Hardware Intrinsics via Inline Asm</h2>
+  <h3>CPUID — CPU Feature Detection</h3>
+  <pre><code>uint32_t a, b, c, d;
+asm volatile (
+    "cpuid"
+    : "=a"(a), "=b"(b), "=c"(c), "=d"(d)
+    : "a"(leaf), "c"(0)   <span class="comment">/* leaf → eax, subleaf → ecx */</span>
+    :
+);
+<span class="comment">/* Vendor string: 12 chars from ebx, edx, ecx */</span>
+char vendor[13] = {0};
+memcpy(vendor+0, &amp;b, 4);
+memcpy(vendor+4, &amp;d, 4);
+memcpy(vendor+8, &amp;c, 4);</code></pre>
+
+  <h3>RDTSC — Cycle Counter</h3>
+  <pre><code>uint32_t lo, hi;
+asm volatile (
+    "rdtsc"
+    : "=a"(lo), "=d"(hi)
+    : :
+);
+uint64_t cycles = ((uint64_t)hi &lt;&lt; 32) | lo;</code></pre>
+
+  <h2>Reading Compiler Output at -O2</h2>
+  <p>Generate the assembly with <code>make asm-O2</code> (produces <code>inline_asm_O2.s</code>), then look for these patterns:</p>
+
+  <div class="cmp-grid">
+    <div class="cmp-col">
+      <h4>C source</h4>
+      <pre><code>uint64_t multiply_by_5(uint64_t x) {
+    return x * 5;
+}</code></pre>
+    </div>
+    <div class="cmp-col">
+      <h4>gcc -O2 output</h4>
+      <pre><code>multiply_by_5:
+  leaq (%rdi,%rdi,4), %rax
+  ret</code></pre>
+    </div>
+  </div>
+
+  <div class="cmp-grid">
+    <div class="cmp-col">
+      <h4>C source</h4>
+      <pre><code>int64_t absolute_value(int64_t x) {
+    return x &lt; 0 ? -x : x;
+}</code></pre>
+    </div>
+    <div class="cmp-col">
+      <h4>gcc -O2 output</h4>
+      <pre><code>absolute_value:
+  movq  %rdi, %rax
+  negq  %rax
+  cmovns %rdi, %rax
+  ret</code></pre>
+    </div>
+  </div>
+
+  <div class="cmp-grid">
+    <div class="cmp-col">
+      <h4>C source</h4>
+      <pre><code>int64_t divide_by_8(int64_t x) {
+    return x / 8;
+}</code></pre>
+    </div>
+    <div class="cmp-col">
+      <h4>gcc -O2 output</h4>
+      <pre><code>divide_by_8:
+  movq  %rdi, %rax
+  sarq  $63, %rax   <span class="comment">; sign-extend to all 1s or 0</span>
+  shrq  $61, %rax   <span class="comment">; bias = 7 for division by 8</span>
+  addq  %rdi, %rax
+  sarq  $3, %rax    <span class="comment">; arithmetic right-shift by log2(8)</span>
+  ret</code></pre>
+    </div>
+  </div>
+
+  <div class="callout insight">
+    <div class="label">Why the signed division trick?</div>
+    C's signed integer division truncates toward zero. But arithmetic right shift truncates toward negative infinity. For negative numbers these differ: <code>-7 / 8</code> = 0 in C, but <code>-7 &gt;&gt; 3</code> = -1. The compiler adds a bias: <code>x + (x &gt;&gt; 63 &amp; 7)</code> before shifting. The <code>sarq $63</code> produces 0 for non-negative, -1 (all ones) for negative. ANDing with 7 gives the bias. This is one of the most commonly misread patterns in optimized disassembly.
+  </div>
+
+  <h2>Build &amp; Run</h2>
+  <div class="shell">
+    <span class="prompt">$ </span>cd module_17 &amp;&amp; make &amp;&amp; ./inline_asm<br/>
+    <span class="out">=== Inline asm: addq ===
+  add_asm(100, 42) = 142
+
+=== Inline asm: 128-bit multiply via mulq ===
+  0xFFFFFFFFFFFFFFFF * 2:
+    hi = 0x1
+    lo = 0xFFFFFFFFFFFFFFFE
+
+=== Inline asm: bswap (endian flip) ===
+  bswap(0x0102030405060708) = 0x0807060504030201
+
+=== Inline asm: rotate left 32-bit ===
+  rol(0x80000001, 1) = 0x00000003 (expect 0x00000003)
+
+=== Inline asm: cpuid (leaf 0 = vendor string) ===
+  Max leaf: 20
+  Vendor:   GenuineIntel
+
+=== Inline asm: rdtsc (cycle counter) ===
+  Start TSC:  0x000002A5B9C43F10
+  End TSC:    0x000002A5B9C44080
+  Elapsed:    368 cycles
+
+=== Inline asm: rflags ===
+  RFLAGS = 0x0000000000000202
+  CF=0  PF=0  ZF=0  SF=0  IF=1  DF=0  OF=0
+
+=== Compiler optimizations (compile -S -O2 to inspect) ===
+  multiply_by_5(7)       = 35 (look for lea in .s)
+  sum_array([1..8])      = 36 (look for vectorized loop)
+  absolute_value(-42)    = 42 (look for cmov)
+  sum_to_n(100)          = 5050 (look for tail-call jmp)
+  divide_by_8(-16)       = -2 (look for sar + cdq trick)</span><br/>
+    <span class="prompt">$ </span>make asm-O2<br/>
+    <span class="prompt">$ </span>grep -A 5 "multiply_by_5:" inline_asm_O2.s<br/>
+    <span class="out">multiply_by_5:
+  leaq	(%rdi,%rdi,4), %rax
+  ret</span>
+  </div>
+
+  <h2>Exercises</h2>
+  <div class="exercise ex-warmup">
+    <div class="ex-label">Warm-up</div>
+    <h4>1. Inline asm for POPCNT</h4>
+    <p>Write a C function <code>uint64_t popcount_asm(uint64_t x)</code> using inline asm with the <code>popcnt</code> instruction. Use <code>"=r"</code> for output and <code>"r"</code> for input. Verify it returns the same result as <code>__builtin_popcountll(x)</code> for several inputs. Then compile with <code>-O2 -S</code> and find the <code>popcount_asm</code> function — it should be just two instructions (popcnt + ret).</p>
+  </div>
+  <div class="exercise ex-core">
+    <div class="ex-label">Core</div>
+    <h4>2. Annotate the compiler's sum_array output</h4>
+    <p>Run <code>make asm-O2</code> and find the <code>sum_array</code> function in <code>inline_asm_O2.s</code>. Annotate every instruction with a comment explaining what it does. You should see: loop setup, possibly an SSE/AVX vectorized body (look for <code>xmm</code> or <code>ymm</code> registers and <code>paddq</code>/<code>vpaddq</code>), a scalar cleanup loop for remaining elements, and a horizontal reduction to combine vector lanes into the final sum. This is what your Module 13 SIMD work looks like when a compiler does it automatically.</p>
+  </div>
+  <div class="exercise ex-stretch">
+    <div class="ex-label">Stretch</div>
+    <h4>3. CPUID feature flags decoder</h4>
+    <p>Extend <code>inline_asm.c</code> to decode the feature flags from CPUID leaf 1 (set eax=1). The output is in ecx and edx. Key bits: ecx bit 19 = SSE4.1, ecx bit 20 = SSE4.2, ecx bit 25 = AES-NI, ecx bit 28 = AVX, edx bit 26 = SSE2. Print a formatted table showing which features your CPU supports. This is how libc implementations select the fastest code path at runtime, and how security tools detect hardware-backed AES for cipher selection.</p>
+  </div>
+
+  <div class="next-module">
+    <h2><a href="../module_18/tutorial.html" style="color:inherit;">What's Next — Module 18: Stack Exploitation &amp; Mitigations</a></h2>
+    <p>Module 18 is where the whole course converges on offense and defense. You will write a deliberately vulnerable C function with a stack buffer overflow, craft an assembly payload that overwrites the return address, and watch control flow redirect to your shellcode. Then you will enable each mitigation — stack canaries, NX, ASLR, RELRO — one by one and observe how each one stops the exploit, forcing a more sophisticated bypass or a fundamentally different attack class.</p>
+  </div>
+</div>
+</body>
+</html>

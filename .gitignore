@@ -31,3 +31,7 @@ obj/
 core
 core.*
 vgcore.*
+
+# webapp/ (Vite demo)
+webapp/node_modules/
+webapp/dist/

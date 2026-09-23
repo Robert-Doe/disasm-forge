@@ -1,4 +1,4 @@
-// decoder.ts — TypeScript port of module_21/capstone/disasm.asm
+// decoder.ts, TypeScript port of module_21/capstone/disasm.asm
 //
 // This ports the REAL decoding algorithm taught in Module 21 (the course's
 // own capstone): REX prefix detection, ModRM mod/reg/rm extraction, SIB
@@ -10,14 +10,14 @@
 // Two intentional departures from the original assembly, both documented at
 // the call site below:
 //   1. SIB addressing is decoded for REAL (base/index*scale/disp) instead of
-//      the original's hardcoded "[rsp+sib]" placeholder string — the asm
+//      the original's hardcoded "[rsp+sib]" placeholder string, the asm
 //      comment for decode_modrm's .has_sib branch says "for simplicity,
 //      emit... or just [base+disp]" and never actually does; this port
 //      finishes that intent properly.
-//   2. Everything else — including several genuine quirks of the taught
+//   2. Everything else, including several genuine quirks of the taught
 //      encoder (immediates/displacements always rendered as unsigned
 //      zero-padded hex with no minus sign; MOV r64,imm64 always consuming a
-//      full 8-byte immediate with no REX.W check) — is preserved exactly,
+//      full 8-byte immediate with no REX.W check), is preserved exactly,
 //      because those are real, observable behaviors of the module's own
 //      tool, not accidents of the port.
 
@@ -94,7 +94,7 @@ function readInt32(buf: Uint8Array, o: number): number {
 }
 
 /** Reads 8 raw bytes (little-endian in memory) and renders them as a
- * 16-digit big-endian hex string — matches append_u64_hex's shift-from-
+ * 16-digit big-endian hex string, matches append_u64_hex's shift-from-
  * bit-60-down output order, without needing 64-bit integer arithmetic. */
 function hex64LE(buf: Uint8Array, o: number): string {
   const bytes = Array.from(buf.slice(o, o + 8));
@@ -216,7 +216,7 @@ const GROUPFF: Record<number, string> = { 0: 'inc', 1: 'dec', 2: 'call', 4: 'jmp
  * when there are zero bytes available (mirrors disasm_decode returning 0
  * for buf_len == 0). Any opcode this subset doesn't recognise still decodes
  * successfully as a 1-instruction "db 0xXX" fallback, exactly like the
- * original — its length equals however many prefix+opcode bytes were
+ * original, its length equals however many prefix+opcode bytes were
  * already consumed by the time recognition failed. */
 export function decodeOne(buf: Uint8Array, offset: number): DecodedInstruction | null {
   if (offset >= buf.length) return null;
@@ -330,12 +330,12 @@ export function decodeOne(buf: Uint8Array, offset: number): DecodedInstruction |
     if (opcode >= 0x58 && opcode <= 0x5f) { mnemonic = 'pop'; operands = regName(opcode & 7, rexB); break dispatch; }
 
     if (opcode >= 0xb8 && opcode <= 0xbf) {
-      // MOV r64, imm64 — always reads a full 8-byte immediate, with no
+      // MOV r64, imm64, always reads a full 8-byte immediate, with no
       // REX.W check. That matches disasm.asm exactly; real hardware would
       // treat this as MOV r32,imm32 (4-byte immediate) without REX.W. Every
       // worked example in module_21 uses the REX.W-prefixed form, so this
       // never actually diverges from correct decoding on this course's own
-      // material — noted here because it's a genuine quirk, not a bug we
+      // material, noted here because it's a genuine quirk, not a bug we
       // introduced.
       mnemonic = 'mov';
       const hex = hex64LE(buf, o);
@@ -448,7 +448,7 @@ export interface DisassemblyListing {
 }
 
 /** Decodes a whole buffer, instruction after instruction, the same way
- * main.c's disassemble() helper does — but without its early-exit on
+ * main.c's disassemble() helper does, but without its early-exit on
  * RET/INT3/HLT, since this tool is meant to decode whatever the user
  * pastes, not just self-disassembly output. */
 export function disassemble(buf: Uint8Array, maxInstructions = 256): DisassemblyListing {
@@ -480,7 +480,7 @@ export function parseHexBytes(text: string): Uint8Array {
     if (tok.length % 2 === 0) {
       for (let i = 0; i < tok.length; i += 2) bytes.push(parseInt(tok.slice(i, i + 2), 16));
     } else {
-      // Odd-length run (e.g. pasted without separators oddly) — pull nibbles
+      // Odd-length run (e.g. pasted without separators oddly), pull nibbles
       // off two at a time, left-padding the final leftover nibble.
       let i = 0;
       while (i + 1 < tok.length) { bytes.push(parseInt(tok.slice(i, i + 2), 16)); i += 2; }

@@ -42,7 +42,7 @@ app.innerHTML = `
 
   <div class="hero">
     <div class="pill">REX / ModRM / SIB decoding, byte by byte</div>
-    <h1>Disasm Forge <span class="accent">—</span> Mini x86-64 Disassembler</h1>
+    <h1>Disasm Forge <span class="accent">:</span> Mini x86-64 Disassembler</h1>
     <p class="tagline">Paste raw x86-64 machine code bytes and get real Intel-syntax disassembly, with a byte-by-byte breakdown of every REX bit, ModRM field, SIB field, displacement, and immediate. A TypeScript port of this course's Module 21 capstone decoder, originally written in x86-64 assembly.</p>
   </div>
 
@@ -80,7 +80,7 @@ app.innerHTML = `
         group FF (inc/dec/call/jmp r/m) &middot; two-byte 0F: syscall, ud2,
         Jcc rel32, cmovcc, setcc, movzx, movsx, imul &middot; REX prefix
         decoding &middot; full ModRM incl. SIB (base/index*scale/disp) and
-        RIP-relative addressing. Anything else decodes as <code class="inline">db 0xXX</code> and the byte is skipped — this
+        RIP-relative addressing. Anything else decodes as <code class="inline">db 0xXX</code> and the byte is skipped, this
         was scoped to the instruction subset the module's own tutorial and
         capstone actually cover, not the full x86-64 ISA.
       </div>
@@ -88,7 +88,7 @@ app.innerHTML = `
   </main>
 
   <footer>
-    Ported from module_21/capstone/disasm.asm (Module 21 — Capstone: A Mini x86-64 Disassembler).
+    Ported from module_21/capstone/disasm.asm (Module 21, Capstone: A Mini x86-64 Disassembler).
   </footer>
 `;
 
@@ -196,7 +196,7 @@ function renderBreakdown(insn: DecodedInstruction) {
   html += '</div>';
 
   if (insn.rex) {
-    html += `<div class="section-label">REX prefix — 0x${insn.rex.byte.toString(16).padStart(2, '0')}</div>`;
+    html += `<div class="section-label">REX prefix, 0x${insn.rex.byte.toString(16).padStart(2, '0')}</div>`;
     html += bitfieldHtml(insn.rex.byte, [3, 2, 1, 0]);
     html += `<table class="field-table"><tr><th>W</th><th>R</th><th>X</th><th>B</th></tr>
       <tr><td>${insn.rex.W ? '1 (64-bit operand size)' : '0'}</td><td>${insn.rex.R ? '1 (extends ModRM.reg)' : '0'}</td><td>${insn.rex.X ? '1 (extends SIB.index)' : '0'}</td><td>${insn.rex.B ? '1 (extends ModRM.rm / opcode reg)' : '0'}</td></tr></table>`;
@@ -204,7 +204,7 @@ function renderBreakdown(insn: DecodedInstruction) {
 
   if (insn.modrm) {
     const m = insn.modrm;
-    html += `<div class="section-label">ModRM — 0x${m.byte.toString(16).padStart(2, '0')}</div>`;
+    html += `<div class="section-label">ModRM, 0x${m.byte.toString(16).padStart(2, '0')}</div>`;
     html += bitfieldHtml(m.byte, [7, 6, 5, 4, 3, 2, 1, 0]);
     html += `<table class="field-table"><tr><th>mod</th><th>reg</th><th>rm</th></tr>
       <tr><td>${m.mod.toString(2).padStart(2, '0')} (${m.mod})</td><td>${m.reg.toString(2).padStart(3, '0')} (${m.reg})</td><td>${m.rm.toString(2).padStart(3, '0')} (${m.rm})</td></tr></table>`;
@@ -212,7 +212,7 @@ function renderBreakdown(insn: DecodedInstruction) {
 
   if (insn.sib) {
     const s = insn.sib;
-    html += `<div class="section-label">SIB — 0x${s.byte.toString(16).padStart(2, '0')}</div>`;
+    html += `<div class="section-label">SIB, 0x${s.byte.toString(16).padStart(2, '0')}</div>`;
     html += bitfieldHtml(s.byte, [7, 6, 5, 4, 3, 2, 1, 0]);
     html += `<table class="field-table"><tr><th>scale</th><th>index</th><th>base</th></tr>
       <tr><td>${s.scale.toString(2).padStart(2, '0')} (×${1 << s.scale})</td><td>${s.index.toString(2).padStart(3, '0')} (${s.index === 4 ? 'none' : s.index})</td><td>${s.base.toString(2).padStart(3, '0')} (${s.base})</td></tr></table>`;
@@ -227,7 +227,7 @@ function renderBreakdown(insn: DecodedInstruction) {
   }
 
   if (insn.isUnknown) {
-    html += `<div class="section-label">Note</div><div class="note">Opcode 0x${insn.opcodeBytes[insn.opcodeBytes.length - 1].toString(16).padStart(2, '0')} is outside this decoder's supported subset — emitted as <code class="inline">db</code> and skipped, matching the original capstone's fallback behavior.</div>`;
+    html += `<div class="section-label">Note</div><div class="note">Opcode 0x${insn.opcodeBytes[insn.opcodeBytes.length - 1].toString(16).padStart(2, '0')} is outside this decoder's supported subset, emitted as <code class="inline">db</code> and skipped, matching the original capstone's fallback behavior.</div>`;
   }
 
   breakdownEl.innerHTML = html;

@@ -41,9 +41,9 @@ app.innerHTML = `
   </div>
 
   <div class="hero">
-    <div class="pill">real REX / ModRM / SIB decoding — not a mockup</div>
+    <div class="pill">REX / ModRM / SIB decoding, byte by byte</div>
     <h1>Disasm Forge <span class="accent">—</span> Mini x86-64 Disassembler</h1>
-    <p class="tagline">Paste raw x86-64 machine code bytes and get real Intel-syntax disassembly, with a byte-by-byte breakdown of every REX bit, ModRM field, SIB field, displacement and immediate — a TypeScript port of this course's Module 21 capstone decoder (originally written in x86-64 assembly itself).</p>
+    <p class="tagline">Paste raw x86-64 machine code bytes and get real Intel-syntax disassembly, with a byte-by-byte breakdown of every REX bit, ModRM field, SIB field, displacement, and immediate. A TypeScript port of this course's Module 21 capstone decoder, originally written in x86-64 assembly.</p>
   </div>
 
   <main class="demo">
